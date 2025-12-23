@@ -57,16 +57,20 @@ sftp_connect <- function(
 
   }
 
-  userpass <- paste0(username, ':', password)
+  # create and configure handle
+  h <- curl::new_handle()
+  curl::handle_setopt(h, userpwd = paste0(username, ':', password))
+
+  # userpass <- paste0(username, ':', password)
 
   protocol <- paste0(regmatches(protocol, regexpr('\\w+', protocol)), '://')
 
   sftp_conn <-
     list(
       url            = paste0(protocol, server),
-      url_port       = paste0(protocol, server, ':', port),
-      login_url      = paste0(protocol, userpass, '@', server),
-      login_url_port = paste0(protocol, userpass, '@', server, ':', port)
+      url_port       = paste0(protocol, server, ':', port)
+      # login_url      = paste0(protocol, userpass, '@', server),
+      # login_url_port = paste0(protocol, userpass, '@', server, ':', port)
     )
 
   if (!is.null(folder) && nchar(folder) != 0) {
@@ -81,9 +85,10 @@ sftp_connect <- function(
         protocol = protocol,
         server   = server,
         port     = port,
-        username = username,
-        password = password,
-        userpass = userpass,
+        h        = h,
+        # username = username,
+        # password = password,
+        # userpass = userpass,
         timeout  = timeout
       ),
       sftp_conn

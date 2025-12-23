@@ -13,12 +13,8 @@ sftp_list <- function(
     .recursive = F
 ) {
 
-  # create and configure handle
-  h <- curl::new_handle()
-  curl::handle_setopt(h, userpwd = sftp_conn$userpass)
-
   # get response
-  resp <- try(curl::curl_fetch_memory(sftp_conn$url, h))
+  resp <- try(curl::curl_fetch_memory(sftp_conn$url, sftp_conn$h))
 
   if (resp$status_code != 0) stop('SFTP connection issue')
 
@@ -42,7 +38,7 @@ sftp_list <- function(
             sftp_parse(
               sftp_url = df_row$url,
               subdir   = df_row$name,
-              h        = h
+              h        = sftp_conn$h
             )
 
           df_output <-
