@@ -1,0 +1,24 @@
+{
+  "name": "R SFTP Dev Env",
+  "image": "ghcr.io/rocker-org/devcontainer/tidyverse:4.3",
+  "customizations": {
+    "vscode": {
+      "extensions": ["REditorSupport.r"]
+    }
+  },
+  "features": {
+    "ghcr.io/rocker-org/devcontainer-features/r-apt:latest": {
+      "installDevTools": true,
+      "installREnv": true,
+      "installRMarkdown": true,
+      "vscodeRSupport": "lsp"
+    },
+    // This feature mounts the persistent volume for R packages
+    "ghcr.io/rocker-org/devcontainer-features/renv-cache:latest": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    }
+  },
+   // This starts your test SFTP server automatically on boot
+  "postCreateCommand": "bash .devcontainer/setup.sh"
+}
