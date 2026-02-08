@@ -86,12 +86,12 @@ sftp_connect <- function(
   }
 
   sftp_conn <-
-    list(
-      protocol = protocol,
-      hostname = hostname,
-      port     = port,
-      h        = h,
-      timeout  = timeout
+    append(
+      url_components,
+      list(
+        h        = h,
+        timeout  = timeout
+      )
     )
 
   return(sftp_conn)
@@ -137,13 +137,16 @@ build_sftp_url <- function(protocol, hostname, port, folder = NULL) {
       "|",
       # capture grp 2 matching hostname or IPv4 (run until `:` or `/` or ws)
       "([^:/\\s]+)",
-      ")"
+      ")",
+      # optional non-cap grp matching ":port"
+      "(?:\\:(\\d+))?"
       # # consume the rest (port, folder path, etc)
       # c(
       #   hostname = ".*$",
-      #   folder = "(.*$)"
+      #   folder = "(?:/([^?#]*))?"
       # )
     )
+
   ## protocol: auto clean up symbols
   protocol <- paste0(regmatches(protocol, regexpr("\\w+", protocol)), "://")
   ## port: overwrite if found in hostname
@@ -160,7 +163,11 @@ build_sftp_url <- function(protocol, hostname, port, folder = NULL) {
 
   ## folder: clean up leading/trailing slashes, replace multiple with single
   regex_folder <-
-    regexec(paste0(regex_hostname, "(.*$)"), hostname, perl = TRUE)
+    regexec(
+      paste0(regex_hostname, "(?:/([^?#]*))?$"),
+      hostname,
+      perl = TRUE
+    )
   hostname_folder <- tail(unlist(regmatches(hostname, regex_folder)), 1)
   if (nchar(hostname_folder) > 1) {
     if (!is.null(folder)) {
@@ -186,8 +193,8 @@ build_sftp_url <- function(protocol, hostname, port, folder = NULL) {
           regexec(paste0(regex_hostname, ".*$"), hostname, perl = TRUE)
         )
       ),
-      1
-    )
+      2
+    )[1]
 
   return(
     list(
