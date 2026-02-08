@@ -26,73 +26,47 @@
 #'
 #' @examples
 sftp_connect <- function(
-    server   = 'localhost',
-    folder   = NULL,
+    hostname = "localhost",
+    folder = NULL,
     username = NULL,
     password = NULL,
-    protocol = 'sftp://',
-    port     = 22L,
-    timeout  = 30L
-) {
-
-  sftp_check <- 'sftp' %in% curl::curl_version()$protocol
-  if (isFALSE(sftp_check)) stop('Please check if `curl` contains `sftp` protocol')
-
-  # server name clean up and check
-  server <-
-    grep(
-      x = unlist(strsplit(server, '/')),
-      pattern = ':',
-      value = T,
-      invert = T
-    )
-  server <- server[server != '']
-  server_check <- curl::curl_fetch_memory(server)$status_code == 200
-  if (isFALSE(server_check)) stop('The server cannot be found. Please check')
-
-  # folder name clean
-  if (!is.null(folder)) {
-
-    folder <- gsub('/+', '/', gsub('^/+|/+$', '', folder))
-
-  }
+    protocol = "sftp://",
+    port = 22L,
+    timeout = 30L,
+    .verbose = FALSE) {
+# check protocol "sftp"
+  sftp_check <- "sftp" %in% curl::curl_version()$protocol
+  if (isFALSE(sftp_check)) stop("Please check if `curl` contains `sftp` protocol")
 
   # create and configure handle
   h <- curl::new_handle()
-  curl::handle_setopt(h, userpwd = paste0(username, ':', password))
+  curl::handle_setopt(
+    h,
+userpwd = paste0(username, ":", password),
+    ssh_auth_types = 2,
+    verbose = .verbose
+  )
 
-  # userpass <- paste0(username, ':', password)
+  url_components <- build_sftp_url(protocol, hostname, port, folder)
 
-  protocol <- paste0(regmatches(protocol, regexpr('\\w+', protocol)), '://')
-
-  sftp_conn <-
-    list(
-      url            = paste0(protocol, server),
-      url_port       = paste0(protocol, server, ':', port)
-      # login_url      = paste0(protocol, userpass, '@', server),
-      # login_url_port = paste0(protocol, userpass, '@', server, ':', port)
+  hostname_check <-
+    try(
+      silent = TRUE,
+      curl::curl_fetch_memory(url_components$full_url, handle = h)
     )
 
-  if (!is.null(folder) && nchar(folder) != 0) {
-
-    sftp_conn <- lapply(sftp_conn, \(path) file.path(path, folder))
-
+  if (inherits(hostname_check, "try-error")) {
+    stop("The hostname cannot be found. Please check")
   }
 
   sftp_conn <-
-    append(
-      list(
+          list(
         protocol = protocol,
-        server   = server,
+        hostname = hostname,
         port     = port,
         h        = h,
-        # username = username,
-        # password = password,
-        # userpass = userpass,
-        timeout  = timeout
-      ),
-      sftp_conn
-    )
+                timeout  = timeout
+          )
 
   return(sftp_conn)
 }
