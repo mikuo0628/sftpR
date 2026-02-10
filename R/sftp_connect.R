@@ -62,7 +62,9 @@ sftp_connect <- function(
     .verbose = FALSE) {
   # check protocol "sftp"
   sftp_check <- "sftp" %in% curl::curl_version()$protocol
-  if (isFALSE(sftp_check)) stop("Please check if `curl` contains `sftp` protocol")
+  if (isFALSE(sftp_check)) {
+    stop("Please check if `curl` contains `sftp` protocol")
+  }
 
   # create and configure handle
   h <- curl::new_handle()
