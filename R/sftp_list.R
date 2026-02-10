@@ -1,39 +1,60 @@
-
-#' Title
+#' List and Crawl SFTP Directory Contents
 #'
-#' @param sftp_conn
-#' @param .recursive
+#' `sftp_list` retrieves a directory listing from an SFTP server. If
+#' `.recursive = TRUE`, it will perform a depth-first crawl of all
+#' subdirectories found.
 #'
-#' @returns
+#' @param sftp_conn A list object containing:
+#' \itemize{
+#'   \item \code{full_url}: The character string URL to the target directory.
+#'   \item \code{h}: A pre-configured \code{curl} handle with authentication.
+#' }
+#' @param .recursive Logical. If \code{TRUE}, recursively enters subdirectories
+#'   to return a flattened tree of all remote objects. Defaults to \code{FALSE}.
+#'
+#' @return A \code{data.frame} containing remote file/directory metadata:
+#' \itemize{
+#'   \item \code{permission}: Unix-style permission string (e.g., "drwxr-xr-x").
+#'   \item \code{nlink}: Number of hard links.
+#'   \item \code{user}: Owner username.
+#'   \item \code{group}: Owner group.
+#'   \item \code{size}: File size in bytes.
+#'   \item \code{month, day, time_year}: Timestamp components.
+#'   \item \code{name}: File or directory name.
+#'   \item \code{type}: Categorization as "dir" or "file".
+#'   \item \code{url}: The source URL for that specific object.
+#' }
+#'
 #' @export
-#'
 #' @examples
 sftp_list <- function(
-    sftp_conn  = NULL,
-    .recursive = F
-) {
-
+    sftp_conn = NULL,
+    .recursive = F) {
   # get response
-  resp <- try(curl::curl_fetch_memory(sftp_conn$url, sftp_conn$h))
+  resp <-
+    try(
+      curl::curl_fetch_memory(sftp_conn$full_url, sftp_conn$h)
+    )
 
-  if (resp$status_code != 0) stop('SFTP connection issue')
+  if (resp$status_code != 0 || inherits(resp, "try-error")) {
+    stop("SFTP connection issue")
+  }
 
   df_objs <- sftp_parse(resp)
 
+  # recursively crawl subdirectories
   if (isTRUE(.recursive)) {
-
     sftp_crawl <- function(df_objs) {
-
-      if (all(df_objs$type == 'file')) return(df_objs)
+      if (all(df_objs$type == "file")) {
+        return(df_objs)
+      }
 
       df_output <- data.frame()
 
       for (df_row in split(df_objs, 1:nrow(df_objs))) {
-
         df_output <- rbind(df_output, df_row)
 
-        if (df_row$type == 'dir') {
-
+        if (df_row$type == "dir") {
           df_objs <-
             sftp_parse(
               sftp_url = df_row$url,
@@ -46,17 +67,13 @@ sftp_list <- function(
               df_output,
               sftp_crawl(df_objs)
             )
-
         }
-
       }
 
       return(df_output)
-
     }
 
     df_objs <- sftp_crawl(df_objs)
-
   }
 
   # ls -l follows specific Unix convention:
@@ -65,82 +82,93 @@ sftp_list <- function(
   # if `time_year` shows `YYYY`, assume older than last 6 months.
 
   return(df_objs)
-
 }
 
-#' Title
+#' Parse SFTP Directory Listings into Data Frames
 #'
-#' @param resp
-#' @param sftp_url
-#' @param subdir
-#' @param h
+#' @description
+#' A utility function that converts the raw binary content of an SFTP directory
+#' listing (returned by \code{curl}) into a structured R \code{data.frame}.
 #'
-#' @returns
+#' @param resp A response list from \code{curl::curl_fetch_memory}. If \code{NULL},
+#'   the function will attempt to fetch data using \code{sftp_url} and \code{h}.
+#' @param sftp_url Character. The SFTP URL to fetch if \code{resp} is \code{NULL}.
+#' @param subdir Character. An optional subdirectory to append to \code{sftp_url}.
+#' @param h A \code{curl} handle. Required only if \code{resp} is \code{NULL}.
 #'
-#' @examples
+#' @return A \code{data.frame} with parsed Unix-style directory metadata,
+#'   or \code{NULL} if the directory is empty.
+#'
+#' @details
+#' The function automatically filters out the special Unix directory entries
+#' \code{"."} and \code{".."}. It determines object types based on the first
+#' character of the permission string (e.g., 'd' for directory).
+#'
 sftp_parse <- function(
-    resp     = NULL,
+    resp = NULL,
     sftp_url = NULL,
-    subdir   = NULL,
-    h        = NULL
-) {
+    subdir = NULL,
+    h = NULL) {
   if (is.null(resp)) {
-
-    if (is.null(sftp_url)) stop('Must supply either `response` list or SFTP URL')
+    if (is.null(sftp_url)) stop("Must supply either `resp` or `sftp_url`")
 
     url <-
       do.call(
+        # TODO: should i use file.path or paste0 here?
+        # file.path is cleaner but may cause issues with
+        # trailing slashes in URLs
         file.path,
         append(
           Filter(
             Negate(is.null),
-            list(sftp_url = gsub('/$', '', sftp_url), subdir = subdir)
+            list(sftp_url = gsub("/$", "", sftp_url), subdir = subdir)
           ),
-          list('/')
+          list("/")
         )
       )
 
     resp <- do.call(curl::curl_fetch_memory, list(url = url, h = h))
-
   } else {
-
     url <- resp$url
-
   }
 
   # parse `ls -l` style output into df
   df_objs <-
     data.frame(
       read.table(
-        text = unlist(strsplit(rawToChar(resp$content), '\n')),
-        sep = '',
-        fill = T,
+        text = unlist(strsplit(rawToChar(resp$content), "\n")),
+        sep = "",
+        fill = TRUE,
         col.names =
           c(
-            'permission', 'nlink', 'user', 'group', 'size',
-            'month', 'day', 'time_year',
-            'name'
+            "permission", "nlink", "user", "group", "size",
+            "month", "day", "time_year",
+            "name"
           )
       )
     )
 
   # remove special directory entries
-  df_objs <- subset(df_objs, !name %in% c('.', '..'))
+  df_objs <- subset(df_objs, !name %in% c(".", ".."))
 
   # handle type
   df_objs$type <-
     sapply(
       substr(df_objs$permission, 1, 1),
-      \(x) switch(x, 'd' = 'dir', '-' = 'file'),
+      \(x) switch(x,
+        "d" = "dir",
+        "-" = "file"
+      ),
       simplify = T
     )
 
-  if (nrow(df_objs) == 0) return(NULL)
+  if (nrow(df_objs) == 0) {
+    return(NULL)
+  }
 
   df_objs$url <- url
 
   return(df_objs)
-
 }
 
 # sftp_list(
@@ -156,4 +184,3 @@ sftp_parse <- function(
 #   ),
 #   .recursive = T
 # )
-
