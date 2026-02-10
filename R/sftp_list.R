@@ -3,6 +3,9 @@
 #' `sftp_list` retrieves a directory listing from an SFTP server. If
 #' `.recursive = TRUE`, it will perform a depth-first crawl of all
 #' subdirectories found.
+#' When \code{.recursive = TRUE}, the function implements a path-tracking 
+#' algorithm to detect and skip circular symbolic links, preventing 
+#' infinite recursion and stack overflow errors.
 #'
 #' @param sftp_conn A list object containing:
 #' \itemize{
@@ -66,7 +69,7 @@ sftp_list <- function(
 
           new_visited <- c(visited, target_url)
 
-          df_objs <-
+          df_objs_sub <-
             sftp_parse(
               sftp_url = df_row$url,
               subdir   = df_row$name,
@@ -76,7 +79,7 @@ sftp_list <- function(
           df_output <-
             rbind(
               df_output,
-              sftp_crawl(df_objs, visited = new_visited)
+              sftp_crawl(df_objs_sub, visited = new_visited)
             )
         }
       }
@@ -84,14 +87,13 @@ sftp_list <- function(
       return(df_output)
     }
 
-    df_objs <- sftp_crawl(df_objs)
+    df_objs <- sftp_crawl(df_objs, visited = sftp_conn$full_url)
   }
 
   # ls -l follows specific Unix convention:
   # if `time_year` shows `HH:MM`, assume year == last 6 months, even if
   # crossing over to previous year.
   # if `time_year` shows `YYYY`, assume older than last 6 months.
-
   return(df_objs)
 }
 
@@ -122,22 +124,7 @@ sftp_parse <- function(
     h = NULL) {
   if (is.null(resp)) {
     if (is.null(sftp_url)) stop("Must supply either `resp` or `sftp_url`")
-
-    url <-
-      do.call(
-        # TODO: should i use file.path or paste0 here?
-        # file.path is cleaner but may cause issues with
-        # trailing slashes in URLs
-        file.path,
-        append(
-          Filter(
-            Negate(is.null),
-            list(sftp_url = gsub("/$", "", sftp_url), subdir = subdir)
-          ),
-          list("/")
-        )
-      )
-
+    url <- url_path_join(sftp_url, subdir, is_dir = !is.null(subdir))
     resp <- do.call(curl::curl_fetch_memory, list(url = url, h = h))
   } else {
     url <- resp$url
