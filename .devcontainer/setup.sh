@@ -15,4 +15,5 @@ ssh-keyscan -t ed25519 -p 2222 127.0.0.1 >> ~/.ssh/known_hosts
 chmod 644 ~/.ssh/known_hosts
 
 # 3. Start SFTP server
+# "upload": Chroot jail
 docker run --name sftp_test -p 2222:22 -d atmoz/sftp tester:password123:::upload
