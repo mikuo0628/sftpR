@@ -29,7 +29,7 @@
 #' @examples
 sftp_list <- function(
     sftp_conn = NULL,
-    .recursive = F) {
+    .recursive = FALSE) {
   # get response
   resp <-
     try(
@@ -44,7 +44,7 @@ sftp_list <- function(
 
   # recursively crawl subdirectories
   if (isTRUE(.recursive)) {
-    sftp_crawl <- function(df_objs) {
+    sftp_crawl <- function(df_objs, visited = character()) {
       if (all(df_objs$type == "file")) {
         return(df_objs)
       }
@@ -55,6 +55,17 @@ sftp_list <- function(
         df_output <- rbind(df_output, df_row)
 
         if (df_row$type == "dir") {
+          # build URL to be checked
+          target_url <-
+            paste0(gsub("/$", "", df_row$url), "/", df_row$name, "/")
+          # safety check to avoid circular symbolic link
+          if (target_url %in% visited) {
+            warning("Circular link detected. Skipping: ", target_url)
+            next
+          }
+
+          new_visited <- c(visited, target_url)
+
           df_objs <-
             sftp_parse(
               sftp_url = df_row$url,
@@ -65,7 +76,7 @@ sftp_list <- function(
           df_output <-
             rbind(
               df_output,
-              sftp_crawl(df_objs)
+              sftp_crawl(df_objs, visited = new_visited)
             )
         }
       }
@@ -103,7 +114,7 @@ sftp_list <- function(
 #' The function automatically filters out the special Unix directory entries
 #' \code{"."} and \code{".."}. It determines object types based on the first
 #' character of the permission string (e.g., 'd' for directory).
-#'
+#' @keywords internal
 sftp_parse <- function(
     resp = NULL,
     sftp_url = NULL,
