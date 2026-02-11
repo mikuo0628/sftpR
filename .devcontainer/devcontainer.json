@@ -3,7 +3,10 @@
   "image": "ghcr.io/rocker-org/devcontainer/tidyverse:4.3",
   "customizations": {
     "vscode": {
-      "extensions": ["REditorSupport.r"]
+      "extensions": [
+        "REditorSupport.r",
+        "continue.continue"
+      ]
     }
   },
   "features": {
@@ -19,6 +22,7 @@
       "version": "latest"
     }
   },
-   // This starts your test SFTP server automatically on boot
-  "postCreateCommand": "bash .devcontainer/setup.sh"
+  // This starts your test SFTP server automatically on boot
+  "postCreateCommand": "chmod +x .devcontainer/*.sh && bash .devcontainer/run_sftp.sh",
+  "postStartCommand": "bash .devcontainer/start_sftp.sh"
 }
