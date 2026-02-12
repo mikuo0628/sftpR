@@ -248,7 +248,7 @@ sftp_connect <- R6::R6Class(
 
         return(h)
       }
-    },
+    }
   )
 )
 
