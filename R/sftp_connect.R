@@ -43,19 +43,19 @@ sftp_connect <- R6::R6Class(
     initialize =
       function(protocol = "sftp://",
                hostname = "localhost",
-               folder = NULL,
-               port = 22L,
+               folder   = NULL,
+               port     = 22L,
                username = NA_character_,
                password = NA_character_,
-               timeout = 30L,
+               timeout  = 30L,
                ...,
                .verbose = FALSE) {
-        self$protocol <- protocol
-        self$hostname <- hostname
-        self$folder <- folder
-        self$port <- port
-        self$timeout <- timeout
-        self$.verbose <- .verbose
+        self$protocol    <- protocol
+        self$hostname    <- hostname
+        self$folder      <- folder
+        self$port        <- port
+        self$timeout     <- timeout
+        self$.verbose    <- .verbose
         private$username <- username
         private$password <- password
 
@@ -253,11 +253,3 @@ sftp_connect <- R6::R6Class(
     password = NA_character_
   )
 )
-
-# test <-
-#   sftp_connect$new(
-#     hostname = "127.0.0.1",
-#     port     = 2222,
-#     username = "tester",
-#     password = "password123"
-#   )
