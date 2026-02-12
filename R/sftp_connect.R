@@ -129,22 +129,7 @@ sftp_connect <- R6::R6Class(
 
       # Return self invisibly (R6 best practice)
       invisible(self)
-    }
-  ),
-  active = list(
-    #' @field clean_url Returns the processed SFTP URL via `build_sftp_url`.
-    clean_url = function() {
-      build_sftp_url(
-        protocol = self$protocol,
-        hostname = self$hostname,
-        port     = self$port,
-        folder   = self$folder
-      )
-    }
-  ),
-  private = list(
-    username = NA_character_,
-    password = NA_character_,
+    },
 
     #' @description
     #' Internal method to generate a specialized upload handle with streaming.
@@ -152,7 +137,7 @@ sftp_connect <- R6::R6Class(
     #' @param local_file Path to file, data.frame, or connection.
     #' @param reuse Logical; try to keep connection alive.
     #' @param ... Additional options for [curl::handle_setopt()].
-    upload_handle = function(local_file, reuse = TRUE, ...) {
+    .upload_handle = function(local_file, reuse = TRUE, ...) {
       # check if `local_file` exists
       if (is.character(local_file)) {
         if (!file.exists(local_file)) {
@@ -186,69 +171,86 @@ sftp_connect <- R6::R6Class(
         }
         # update `local_file` to point to the temp file location
         local_file <- temp_local_file
-        file_conn <-
-          if (is.character(local_file)) {
-            local_file <- normalizePath(local_file, mustWork = TRUE)
-            infilesize <- file.info(local_file)$size
-            base::file(file, open = "rb")
-          } else if (inherits(local_file, "connection")) {
-            local_file
-          } else {
-            stop(
-              paste(
-                "`local_file` must be a data.frame,",
-                "character path or a connection object."
-              )
-            )
-          }
-        # create upload handle with streaming read and seek functions
-        total_bytes <- 0
-        h <-
-          curl::new_handle(
-            upload = TRUE,
-            filetime = FALSE,
-            # adopted callback mechanism
-            # from curl::curl_upload()'s handle settings
-            readfunction = function(n) {
-              buffer <- readBin(local_file, what = raw(), n = n)
-              total_bytes <<- total_bytes + length(buffer)
-              if (self$.verbose) {
-                if (length(buffer) == 0 || identical(total_bytes, infilesize)) {
-                  cat(
-                    sprintf(
-                      "\rUpload %.0f bytes... all done!\n",
-                      total_bytes
-                    ),
-                    file = stderr()
-                  )
-                } else {
-                  cat(
-                    sprintf(
-                      "\rUpload %.0f bytes...", total_bytes
-                    ),
-                    file = stderr()
-                  )
-                }
-              }
-              return(buffer)
-            },
-            # adopted "rewind" mechanism
-            # from curl::curl_upload()'s handle settings
-            seekfunction = function(offset) seek(local_file, where = offset),
-            forbid_reuse = !isTRUE(reuse),
-            userpwd = paste0(private$username, ":", private$password),
-            ssh_auth_types = 2,
-            verbose = self$.verbose,
-            ...
-          )
-
-        if (!is.na(infilesize)) {
-          curl::handle_setopt(h, infilesize_large = infilesize)
-        }
-
-        return(h)
       }
+      file_conn <-
+        if (is.character(local_file)) {
+          local_file <- normalizePath(local_file, mustWork = TRUE)
+          infilesize <- file.info(local_file)$size
+          base::file(local_file, open = "rb")
+        } else if (inherits(local_file, "connection")) {
+          local_file
+        } else {
+          stop(
+            paste(
+              "`local_file` must be a data.frame,",
+              "character path or a connection object."
+            )
+          )
+        }
+      # create upload handle with streaming read and seek functions
+      total_bytes <- 0
+      h <-
+        curl::new_handle(
+          upload = TRUE,
+          filetime = FALSE,
+
+          # adopted callback mechanism
+          # from curl::curl_upload()'s handle settings
+          readfunction = function(n) {
+            buffer <- readBin(file_conn, what = raw(), n = n)
+            total_bytes <<- total_bytes + length(buffer)
+            if (self$.verbose) {
+              if (length(buffer) == 0 || identical(total_bytes, infilesize)) {
+                cat(
+                  sprintf(
+                    "\rUpload %.0f bytes... all done!\n",
+                    total_bytes
+                  ),
+                  file = stderr()
+                )
+              } else {
+                cat(
+                  sprintf(
+                    "\rUpload %.0f bytes...", total_bytes
+                  ),
+                  file = stderr()
+                )
+              }
+            }
+            return(buffer)
+          },
+
+          # adopted "rewind" mechanism
+          # from curl::curl_upload()'s handle settings
+          seekfunction = function(offset) seek(file_conn, where = offset),
+          forbid_reuse = !isTRUE(reuse),
+          userpwd = paste0(private$username, ":", private$password),
+          ssh_auth_types = 2,
+          verbose = self$.verbose,
+          ...
+        )
+
+      if (!is.na(infilesize)) {
+        curl::handle_setopt(h, infilesize_large = infilesize)
+      }
+
+      return(list(h = h, file_conn = file_conn))
     }
+  ),
+  active = list(
+    #' @field clean_url Returns the processed SFTP URL via `build_sftp_url`.
+    clean_url = function() {
+      build_sftp_url(
+        protocol = self$protocol,
+        hostname = self$hostname,
+        port     = self$port,
+        folder   = self$folder
+      )
+    }
+  ),
+  private = list(
+    username = NA_character_,
+    password = NA_character_
   )
 )
 
