@@ -6,8 +6,8 @@ Rscript -e 'renv::restore()'
 # "upload": Chroot jail
 # create `upload` folder on host and mount it to container, 
 # so that we can test file uploads
-mkdir -p /workspaces/sftpR/upload
-chmod -R 755 /workspaces/sftpR/upload
+mkdir -p "$(pwd)/upload"
+chmod -R 755 "$(pwd)/upload"
 
 # 3. Start the SFTP server in the background
 # Function to wait for docker daemon to be ready
@@ -27,5 +27,5 @@ docker rm -f sftp_test || true
 echo "Starting sftp_test container..."
 docker run --name sftp_test \
     -p 2222:22 \
-    -v /workspaces/sftpR/upload:/upload \
+    -v "$(pwd)/upload:/home/tester/upload" \
     -d atmoz/sftp tester:password123:::upload
