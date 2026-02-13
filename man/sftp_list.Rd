@@ -4,14 +4,11 @@
 \alias{sftp_list}
 \title{List and Crawl SFTP Directory Contents}
 \usage{
-sftp_list(sftp_conn = NULL, .recursive = F)
+sftp_list(sftp_conn = NULL, .recursive = FALSE)
 }
 \arguments{
-\item{sftp_conn}{A list object containing:
-\itemize{
-  \item \code{full_url}: The character string URL to the target directory.
-  \item \code{h}: A pre-configured \code{curl} handle with authentication.
-}}
+\item{sftp_conn}{A \code{SFTPConn} object containing connection details and
+authentication. Created by \code{\link{sftp_connect}}.}
 
 \item{.recursive}{Logical. If \code{TRUE}, recursively enters subdirectories
 to return a flattened tree of all remote objects. Defaults to \code{FALSE}.}
@@ -31,7 +28,9 @@ A \code{data.frame} containing remote file/directory metadata:
 }
 }
 \description{
-`sftp_list` retrieves a directory listing from an SFTP server. If
-`.recursive = TRUE`, it will perform a depth-first crawl of all
-subdirectories found.
+Retrieves a directory listing from an SFTP server. If
+\code{.recursive = TRUE}, it will perform a depth-first crawl of all
+subdirectories found, implementing a path-tracking
+algorithm to detect and skip circular symbolic links, preventing
+infinite recursion and stack overflow errors.
 }

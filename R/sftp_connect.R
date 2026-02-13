@@ -9,7 +9,8 @@
 #' The class uses a "streaming" upload mechanism (via \code{readfunction}) to
 #' handle large files efficiently without loading them entirely into memory.
 #'
-#' @return An `SFTPConn` object with methods for connection management and
+#' @return 
+#' An `SFTPConn` object with methods for connection management and
 #' file uploads.
 #'
 #' @examples

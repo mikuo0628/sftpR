@@ -1,17 +1,14 @@
 #' List and Crawl SFTP Directory Contents
 #'
-#' `sftp_list` retrieves a directory listing from an SFTP server. If
-#' `.recursive = TRUE`, it will perform a depth-first crawl of all
-#' subdirectories found.
-#' When \code{.recursive = TRUE}, the function implements a path-tracking 
-#' algorithm to detect and skip circular symbolic links, preventing 
+#' Retrieves a directory listing from an SFTP server. If
+#' \code{.recursive = TRUE}, it will perform a depth-first crawl of all
+#' subdirectories found, implementing a path-tracking
+#' algorithm to detect and skip circular symbolic links, preventing
 #' infinite recursion and stack overflow errors.
 #'
-#' @param sftp_conn A list object containing:
-#' \itemize{
-#'   \item \code{full_url}: The character string URL to the target directory.
-#'   \item \code{h}: A pre-configured \code{curl} handle with authentication.
-#' }
+#' @param sftp_conn A \code{SFTPConn} object containing connection details and
+#' authentication. Created by \code{\link{sftp_connect}}.
+#'
 #' @param .recursive Logical. If \code{TRUE}, recursively enters subdirectories
 #'   to return a flattened tree of all remote objects. Defaults to \code{FALSE}.
 #'
@@ -36,7 +33,7 @@ sftp_list <- function(
   # get response
   resp <-
     try(
-      curl::curl_fetch_memory(sftp_conn$full_url, sftp_conn$h)
+      curl::curl_fetch_memory(sftp_conn$clean_url$full_url, sftp_conn$h)
     )
 
   if (resp$status_code != 0 || inherits(resp, "try-error")) {
@@ -87,7 +84,7 @@ sftp_list <- function(
       return(df_output)
     }
 
-    df_objs <- sftp_crawl(df_objs, visited = sftp_conn$full_url)
+    df_objs <- sftp_crawl(df_objs, visited = sftp_conn$clean_url$full_url)
   }
 
   # ls -l follows specific Unix convention:
@@ -168,17 +165,3 @@ sftp_parse <- function(
 
   return(df_objs)
 }
-
-# sftp_list(
-#   sftp_connect(
-#     server   = 'sftp://sftp.phsa.ca/',
-#     # folder   = '/////test///test////',
-#     # username = 'SVC_BCCDCAnalytics',
-#     # password = 'y26W99322-84294',
-#     # folder   = 'BCEHS',
-#     username = 'michael.kuo@bccdc.ca',
-#     password = keyring::key_get('michael.kuo'),
-#     port     = 22
-#   ),
-#   .recursive = T
-# )

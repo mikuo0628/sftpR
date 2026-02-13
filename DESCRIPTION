@@ -16,5 +16,6 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     curl,
-    magrittr
+    magrittr,
+    R6
 RoxygenNote: 7.3.3
