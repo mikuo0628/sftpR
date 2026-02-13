@@ -3,14 +3,29 @@
 \name{sftp_connect}
 \alias{sftp_connect}
 \title{SFTP Connection Class}
+\value{
+An `SFTPConn` object with methods for connection management and
+file uploads.
+}
 \description{
 An R6 class to manage SFTP connections, handle authentication, and perform
-robust file transfers using `curl`. Credentials and handles are stored
+robust file transfers using \code{curl}. Credentials and handles are stored
 internally to prevent repeated authentication.
 }
 \details{
-The class uses a "streaming" upload mechanism (via `readfunction`) to handle
-large files efficiently without loading them entirely into memory.
+The class uses a "streaming" upload mechanism (via \code{readfunction}) to
+handle large files efficiently without loading them entirely into memory.
+}
+\examples{
+\dontrun{
+# Create a new SFTP connection
+sftp_conn <- sftp_connect$new(
+  hostname = "127.0.0.1",
+  port     = 2222,
+  username = "tester",
+  password = "password123",
+}
+
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -34,7 +49,8 @@ large files efficiently without loading them entirely into memory.
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{clean_url}}{Returns the processed SFTP URL via `build_sftp_url`.}
+\item{\code{clean_url}}{Returns the processed SFTP URL via internal
+\code{build_sftp_url}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -84,7 +100,7 @@ Create a new SFTP connection object.
 
 \item{\code{timeout}}{Integer. Connection timeout.}
 
-\item{\code{...}}{Additional arguments passed to [curl::handle_setopt()].}
+\item{\code{...}}{Additional arguments passed to \code{curl::handle_setopt()}.}
 
 \item{\code{.verbose}}{Logical. Toggle verbose output.}
 }
@@ -130,7 +146,7 @@ passwords.
 \if{latex}{\out{\hypertarget{method-SFTPConn-.upload_handle}{}}}
 \subsection{Method \code{.upload_handle()}}{
 Internal method to generate a specialized upload handle with streaming.
-Adapted from [curl::curl_upload()].
+Adapted from \code{curl::curl_upload()}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{sftp_connect$.upload_handle(local_file, reuse = TRUE, ...)}\if{html}{\out{</div>}}
 }
@@ -142,7 +158,7 @@ Adapted from [curl::curl_upload()].
 
 \item{\code{reuse}}{Logical; try to keep connection alive.}
 
-\item{\code{...}}{Additional options for [curl::handle_setopt()].}
+\item{\code{...}}{Additional options for \code{curl::handle_setopt()}.}
 }
 \if{html}{\out{</div>}}
 }

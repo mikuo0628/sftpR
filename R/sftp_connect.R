@@ -2,12 +2,25 @@
 #'
 #' @description
 #' An R6 class to manage SFTP connections, handle authentication, and perform
-#' robust file transfers using `curl`. Credentials and handles are stored
+#' robust file transfers using \code{curl}. Credentials and handles are stored
 #' internally to prevent repeated authentication.
 #'
 #' @details
-#' The class uses a "streaming" upload mechanism (via `readfunction`) to handle
-#' large files efficiently without loading them entirely into memory.
+#' The class uses a "streaming" upload mechanism (via \code{readfunction}) to
+#' handle large files efficiently without loading them entirely into memory.
+#'
+#' @return An `SFTPConn` object with methods for connection management and
+#' file uploads.
+#'
+#' @examples
+#' \dontrun{
+#' # Create a new SFTP connection
+#' sftp_conn <- sftp_connect$new(
+#'   hostname = "127.0.0.1",
+#'   port     = 2222,
+#'   username = "tester",
+#'   password = "password123",
+#' }
 #'
 #' @export
 sftp_connect <- R6::R6Class(
@@ -38,7 +51,7 @@ sftp_connect <- R6::R6Class(
     #' @param password Character. SFTP password.
     #' @param timeout Integer. Connection timeout.
     #' @param .verbose Logical. Toggle verbose output.
-    #' @param ... Additional arguments passed to [curl::handle_setopt()].
+    #' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
     #' @return A new `SFTPConn` object.
     initialize =
       function(protocol = "sftp://",
@@ -133,10 +146,10 @@ sftp_connect <- R6::R6Class(
 
     #' @description
     #' Internal method to generate a specialized upload handle with streaming.
-    #' Adapted from [curl::curl_upload()].
+    #' Adapted from \code{curl::curl_upload()}.
     #' @param local_file Path to file, data.frame, or connection.
     #' @param reuse Logical; try to keep connection alive.
-    #' @param ... Additional options for [curl::handle_setopt()].
+    #' @param ... Additional options for \code{curl::handle_setopt()}.
     .upload_handle = function(local_file, reuse = TRUE, ...) {
       # check if `local_file` exists
       if (is.character(local_file)) {
@@ -238,7 +251,8 @@ sftp_connect <- R6::R6Class(
     }
   ),
   active = list(
-    #' @field clean_url Returns the processed SFTP URL via `build_sftp_url`.
+    #' @field clean_url Returns the processed SFTP URL via internal
+    #' \code{build_sftp_url}.
     clean_url = function() {
       build_sftp_url(
         protocol = self$protocol,
