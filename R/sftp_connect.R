@@ -153,6 +153,7 @@ sftp_connect <- R6::R6Class(
     #' @param ... Additional options for \code{curl::handle_setopt()}.
     .upload_handle = function(local_file, reuse = TRUE, ...) {
       # check if `local_file` exists
+      tempfile_used <- FALSE
       if (is.character(local_file)) {
         if (!file.exists(local_file)) {
           stop("Provided `local_file` does not exist.")
@@ -248,7 +249,13 @@ sftp_connect <- R6::R6Class(
         curl::handle_setopt(h, infilesize_large = infilesize)
       }
 
-      return(list(h = h, file_conn = file_conn))
+      return(
+        list(
+          h = h,
+          file_conn = file_conn,
+          tempfile = if (isTRUE(tempfile_used)) local_file else NULL
+        )
+      )
     }
   ),
   active = list(
