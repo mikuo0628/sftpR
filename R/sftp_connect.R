@@ -202,8 +202,11 @@ sftp_connect <- R6::R6Class(
             )
           )
         }
+
+      # private states for tracking upload progress
+      bytes_sent <- 0
+      last_reported_ten <- -1
       # create upload handle with streaming read and seek functions
-      total_bytes <- 0
       h <-
         curl::new_handle(
           upload = TRUE,
@@ -213,25 +216,41 @@ sftp_connect <- R6::R6Class(
           # from curl::curl_upload()'s handle settings
           readfunction = function(n) {
             buffer <- readBin(file_conn, what = raw(), n = n)
-            total_bytes <<- total_bytes + length(buffer)
-            if (self$.verbose) {
-              if (length(buffer) == 0 || identical(total_bytes, infilesize)) {
+            len_buffer <- length(buffer)
+
+            bytes_sent <<- bytes_sent + length(buffer)
+
+            # progress bar: 10% increments
+            if (!is.na(infilesize) && infilesize > 0) {
+              ## calculate progress percentage
+              perc_complete <- bytes_sent / infilesize
+              curr_ten <- floor(floor(perc_complete * 100) / 10) * 10
+
+              if (self$.verbose && curr_ten > last_reported_ten) {
+                last_reported_ten <<- curr_ten
+                bar_width <- curr_ten / 10
+                bar <-
+                  paste0(
+                    "[",
+                    strrep("=", bar_width),
+                    strrep(" ", 10 - bar_width),
+                    "]"
+                  )
                 cat(
                   sprintf(
-                    "\rUpload %.0f bytes... all done!\n",
-                    total_bytes
-                  ),
-                  file = stderr()
+                    "\rUploading: %s %d%% (Total filesize: %.2f MB)",
+                    bar, curr_ten, infilesize / (1024 ^ 2)
+                  )
                 )
-              } else {
-                cat(
-                  sprintf(
-                    "\rUpload %.0f bytes...", total_bytes
-                  ),
-                  file = stderr()
-                )
+                utils::flush.console()
               }
             }
+
+            # Final "All Done" cleanup
+            if (len_buffer == 0 && self$.verbose) {
+              cat("\nUpload Complete.\n", file = stderr())
+            }
+
             return(buffer)
           },
 
