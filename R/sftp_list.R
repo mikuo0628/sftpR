@@ -121,7 +121,7 @@ sftp_parse <- function(
     h = NULL) {
   if (is.null(resp)) {
     if (is.null(sftp_url)) stop("Must supply either `resp` or `sftp_url`")
-    url <- url_path_join(sftp_url, subdir, is_dir = !is.null(subdir))
+    url <- .url_path_join(sftp_url, subdir, is_dir = !is.null(subdir))
     resp <- do.call(curl::curl_fetch_memory, list(url = url, h = h))
   } else {
     url <- resp$url

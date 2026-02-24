@@ -7,9 +7,9 @@ This repository is an R package providing small helpers for SFTP operations. Use
 
 - Key patterns and examples (look at the listed files):
   - Connection builder: `R/sftp_connect.R` — returns an `sftp_conn` list that includes a curl handle (`sftp_conn$h`) and `url`/`url_port` strings. Example call: `sftp_connect(hostname='sftp://127.0.0.1/', folder='upload', username='user', password='pw', port=2222)`.
-  - Upload: `R/sftp_upload.R` — uses `get_sftp_handle()` and `build_sftp_url(protocol, server, remote_path)` then `curl::curl_upload()`; note `curl::handle_setopt(..., ftp_create_missing_dirs = 1)` is used to allow recursive directory creation.
+  - Upload: `R/sftp_upload.R` — uses `get_sftp_handle()` and `.build_sftp_url(protocol, server, remote_path)` then `curl::curl_upload()`; note `curl::handle_setopt(..., ftp_create_missing_dirs = 1)` is used to allow recursive directory creation.
   - Download: `R/sftp_download.R` — accepts `sftp_conn` and uses `sftp_conn$h` with `curl::curl_download()`; it also uses `sftp_list()` to enumerate remote files.
-  - URL helper: `R/sftp_connect.R` defines `build_sftp_url()` — prefer using it to construct server URLs consistently.
+  - URL helper: `R/sftp_connect.R` defines `.build_sftp_url()` — prefer using it to construct server URLs consistently.
 
 - Important runtime / dependency notes:
   - The package relies on the system `curl` with SFTP support; code checks `curl::curl_version()$protocol` for `sftp` in `R/sftp_connect.R`. Ensure test/dev machines have libcurl built with SFTP.

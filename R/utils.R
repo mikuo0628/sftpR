@@ -1,7 +1,5 @@
-print_verbose_msg <- function(verbose = FALSE, msg = "") {
-  if (isTRUE(verbose)) {
-    message(msg)
-  }
+.verbose_msg <- function(verbose = FALSE, msg = "") {
+  if (isTRUE(verbose)) { message(msg) }
 }
 
 #' Build SFTP URL components
@@ -27,7 +25,7 @@ print_verbose_msg <- function(verbose = FALSE, msg = "") {
 #'   ensure a trailing slash if not NULL.
 #' @return A list with components: full_url, protocol, hostname, port, folder.
 #' @keywords internal
-build_sftp_url <- function(protocol, hostname, port, folder = NULL) {
+.build_sftp_url <- function(protocol, hostname, port, folder = NULL) {
   # clean URL components
   regex_hostname <-
     paste0(
@@ -104,7 +102,7 @@ build_sftp_url <- function(protocol, hostname, port, folder = NULL) {
     )[1]
 
   full_url <-
-    url_path_join(
+    .url_path_join(
       base_url = paste0(protocol, hostname, ":", port),
       folder,
       is_dir = !is.null(folder)
@@ -131,7 +129,7 @@ build_sftp_url <- function(protocol, hostname, port, folder = NULL) {
 #' @param ... Additional path components to append.
 #' @param is_dir Logical. If TRUE, ensures a trailing slash.
 #' @keywords internal
-url_path_join <- function(base_url, ..., is_dir = TRUE) {
+.url_path_join <- function(base_url, ..., is_dir = TRUE) {
   # 1. Clean the base URL of any trailing slashes
   url <- gsub("/+$", "", base_url)
 

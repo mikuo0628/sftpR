@@ -162,7 +162,7 @@ sftp_connect <- R6::R6Class(
         # if `local_file` is data, write it to a temp file
         tempfile_used <- TRUE
         temp_local_file <- tempfile()
-        print_verbose_msg(
+        .verbose_msg(
           self$.verbose,
           paste(
             sep = "\n",
@@ -279,9 +279,9 @@ sftp_connect <- R6::R6Class(
   ),
   active = list(
     #' @field clean_url Returns the processed SFTP URL via internal
-    #' \code{build_sftp_url}.
+    #' \code{.build_sftp_url}.
     clean_url = function() {
-      build_sftp_url(
+      .build_sftp_url(
         protocol = self$protocol,
         hostname = self$hostname,
         port     = self$port,

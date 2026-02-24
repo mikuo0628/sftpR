@@ -6,7 +6,7 @@ sftp_download <- function(
     ...
 ) {
 
-  verbose_msg <- function(msg, .print = .verbose) { if (.print) message(msg) }
+  .verbose_msg <- function(msg, .print = .verbose) { if (.print) message(msg) }
 
   browser()
   # cases:

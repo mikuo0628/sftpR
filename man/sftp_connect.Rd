@@ -50,7 +50,7 @@ sftp_conn <- sftp_connect$new(
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
 \item{\code{clean_url}}{Returns the processed SFTP URL via internal
-\code{build_sftp_url}.}
+\code{.build_sftp_url}.}
 }
 \if{html}{\out{</div>}}
 }
