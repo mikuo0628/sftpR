@@ -64,10 +64,18 @@ sftp_connect <- R6::R6Class(
                timeout  = 30L,
                ...,
                .verbose = FALSE) {
-        self$protocol    <- protocol
-        self$hostname    <- hostname
-        self$folder      <- folder
-        self$port        <- port
+        .clean_url <-
+          .build_sftp_url(
+            protocol = protocol,
+            hostname = hostname,
+            port     = port,
+            folder   = folder
+          )
+
+        self$protocol    <- .clean_url$protocol
+        self$hostname    <- .clean_url$hostname
+        self$folder      <- .clean_url$folder
+        self$port        <- .clean_url$port
         self$timeout     <- timeout
         self$.verbose    <- .verbose
         private$username <- username
