@@ -12,4 +12,3 @@ chmod 700 ~/.ssh
 ssh-keyscan -t ed25519 -p 2222 127.0.0.1 >> ~/.ssh/known_hosts
 chmod 644 ~/.ssh/known_hosts
 echo "SSH known_hosts updated."
-

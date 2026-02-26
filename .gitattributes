@@ -1,0 +1,5 @@
+# Force all shell scripts to always use LF, even on Windows
+*.sh text eol=lf
+
+# (Optional) Ensure the devcontainer config also stays LF
+.devcontainer/* text eol=lf

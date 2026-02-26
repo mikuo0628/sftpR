@@ -1,6 +1,6 @@
 #!/bin/bash
 # 1. Restore R packages
-Rscript -e 'renv::restore()'
+# Rscript -e 'renv::restore()'
 
 # 2. Set up environment to map
 # "upload": Chroot jail
