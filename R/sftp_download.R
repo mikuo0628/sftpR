@@ -67,17 +67,3 @@ sftp_download <- function(
 
 
 }
-
-sftp_download(
-  sftp_conn =
-    sftp_connect(
-      server   = 'sftp://sftp.phsa.ca/',
-      # folder   = '/////test///test////',
-      # username = 'SVC_BCCDCAnalytics',
-      # password = 'y26W99322-84294',
-      # folder   = 'BCEHS',
-      username = 'michael.kuo@bccdc.ca',
-      password = keyring::key_get('michael.kuo'),
-      port     = 22
-    )
-)
