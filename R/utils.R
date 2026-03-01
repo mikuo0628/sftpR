@@ -163,6 +163,35 @@
   return(url)
 }
 
+#' Validate and Sanitize SFTP URLs against a Connection Object
+#'
+#' This internal utility ensures that a user-provided URL matches the
+#' "Source of Truth" defined in an [SFTPConn] object. It prevents common
+#' formatting errors, warns against security-risky root access attempts
+#' (double slashes), and corrects any incongruities in the protocol,
+#' hostname, or port.
+#'
+#' @param sftp_conn An `R6` object of class `SFTPConn`.
+#' @param user_url
+#'   Character string. The destination SFTP URL or path provided by the user.
+#'
+#' @details
+#' The function performs the following steps:
+#' \itemize{
+#'   \item Checks for empty inputs.
+#'   \item Detects and "heals" double-slash root access attempts
+#'         (e.g., `sftp://host//path` becomes `sftp://host/path`).
+#'   \item Deconstructs the URL using regular expressions to compare its
+#'         components against the `sftp_conn` settings.
+#'   \item Issues a warning if the user-provided protocol, hostname, or
+#'         port differs from the established connection.
+#'   \item Reconstructs a clean, standardized URL.
+#' }
+#'
+#' @return A sanitized character string containing the validated SFTP URL.
+#'
+#' @keywords internal
+#' @noRd
 .validate_sftp_url <- function(sftp_conn, user_url) {
   if (is.null(user_url) || user_url == "") {
     stop("SFTP URL cannot be empty.")
@@ -171,33 +200,65 @@
   # In curl, sftp://host//path indicates root. We check for // after
   # the authority or at start.
   if (grepl("://[^/]*//", user_url) || grepl("^//", user_url)) {
-    warning(
+    .verbose_msg(
+      .verbose = TRUE,
       paste(
         "Root access attempt detected (//).",
         "SFTP paths should be relative to your home directory for security.",
         "Converting to relative path."
-      )
+      ),
+      warning
     )
+    # This regex finds '://', matches the host/port [^/]+,
+    # then replaces the following '//' with a single '/'
+    user_url <- gsub("(://[^/]+)//", "\\1/", user_url)
+    # Also handle the case if the user started the string with //
+    # (e.g. "//upload/file.csv")
+    user_url <- gsub("^//", "/", user_url)
   }
 
-  browser()
   # Extract parts from user_input to check for incongruence
-  user_url <- "sftp://127.0.0.1:2222/upload/subdir/sub2/mtcars3.csv"
-  user_url <- "sftp:/127.0.0.1:2222/upload/subdir/sub2/mtcars3.csv"
   pattern <- "^(?:([a-z]+:/{1,2}))?([^:/]+)?(?::([0-9]+))?(/.*)?$"
   matches <- regexec(pattern, user_url, perl = TRUE)
-  parts <- regmatches(user_url, matches)[[1]][-1]
-  parts <- setNames(parts, c("protocol", "hostname", "port", "folder"))
-  parts[-length(parts)] == sftp_conn$clean_url[2:4]
-  sftp_conn$clean_url
-}
+  # If empty, will return "" empty string, not NA
+  parts <-
+    setNames(
+      regmatches(user_url, matches)[[1]][-1],
+      c("protocol", "hostname", "port", "folder")
+    )
+  checks <- parts[-length(parts)] == sftp_conn$clean_url[2:4]
 
-# .validate_sftp_url(
-#   sftp_conn =
-#     sftp_connect$new(
-#       hostname = "sftp://127.0.0.1:2222/",
-#       username = "tester",
-#       password = "password123"
-#     ),
-#   "sftp://127.0.0.1:2222/upload/subdir/sub2/mtcars3.csv"
-# )
+  if (isTRUE(all(checks))) {
+    return(user_url)
+  }
+
+  # If mismatching sftp_conn$clean_url, print warning
+  .verbose_msg(
+    .verbose = sftp_conn$.verbose,
+    sprintf(
+      paste(
+        "\nThe following parts of the provided SFTP URL do not match the",
+        "connection:\n%s\n",
+        "\nThey will be replaced by the respective parts in `sftp_conn`."
+      ),
+      paste("  -", names(which(checks == FALSE)), collapse = "\n")
+    ),
+    warning
+  )
+
+  # Replace the mismatched with the appropriate valuess from sftp_conn$clean_url
+  for (part in names(which(checks == FALSE))) {
+    parts[part] <- sftp_conn$clean_url[[part]]
+  }
+
+  user_url <-
+    paste0(
+      parts["protocol"],
+      parts["hostname"],
+      paste0(":", parts["port"]),
+      "/",
+      gsub("^/|/$", "", parts["folder"], perl = TRUE)
+    )
+
+  return(user_url)
+}
