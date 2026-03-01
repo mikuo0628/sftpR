@@ -1,7 +1,12 @@
-.verbose_msg <- function(verbose = FALSE, msg = "") {
-  if (isTRUE(verbose)) {
+.verbose_msg <- function(.verbose = FALSE, msg = "", type = message) {
+  if (!isTRUE(.verbose)) return(invisible(NULL))
+  type <- as.character(substitute(type))
+  switch(
+    type,
+    "warning" = warning(msg, call. = FALSE),
+    "stop"    = stop(msg, call. = FALSE),
     message(msg)
-  }
+  )
 }
 
 #' Build SFTP URL components
