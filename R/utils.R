@@ -32,7 +32,8 @@
 #'   ensure a trailing slash if not NULL.
 #' @return A list with components: full_url, protocol, hostname, port, folder.
 #' @keywords internal
-.build_sftp_url <- function(protocol, hostname, port, folder = NULL) {
+.build_sftp_url <- function(
+    protocol, hostname, port, folder = NULL, .verbose = FALSE) {
   # clean URL components
   regex_hostname <-
     paste0(
@@ -64,11 +65,13 @@
   ## port: overwrite if found in hostname
   regex_port <- regexpr("(?<=:)\\d+", hostname, perl = TRUE)
   if (regex_port[1] != -1) {
-    warning(
+    .verbose_msg(
+      .verbose = .verbose,
       paste(
         "'Port' found in hostname.",
         "Overwriting `port` argument with value from `hostname`."
-      )
+      ),
+      warning
     )
     port <- regmatches(hostname, regex_port)
   }
@@ -83,11 +86,13 @@
   hostname_folder <- tail(unlist(regmatches(hostname, regex_folder)), 1)
   if (nchar(hostname_folder) > 1) {
     if (!is.null(folder)) {
-      warning(
+      .verbose_msg(
+        .verbose = .verbose,
         paste(
           "Folder path found in hostname.",
           "Overwriting `folder` argument with value from `hostname`."
-        )
+        ),
+        warning
       )
     }
     folder <- hostname_folder
@@ -196,6 +201,7 @@
   if (is.null(user_url) || user_url == "") {
     stop("SFTP URL cannot be empty.")
   }
+
   # Check for Double-Slash (Root Access) Attempt
   # In curl, sftp://host//path indicates root. We check for // after
   # the authority or at start.
@@ -218,6 +224,25 @@
   }
 
   # Extract parts from user_input to check for incongruence
+  # Cases:
+  # "sftp://127.0.0.1:2222/upload/mtcars.csv" # full path
+  # "sftp:/127.0.0.1:2222/upload/mtcars.csv"  # typo in protocol
+  # "127.0.0.1:2222/upload/mtcars.csv"        # no protocol
+  # "127.0.0.1/upload/mtcars.csv"             # no port
+  # "/upload/mtcars.csv"                      # just relative path
+  # "upload/mtcars.csv"                       # relative path w/o leading slash
+  # group 1) protocol (?:([a-z]+:/{1,2}))?
+  # "optional" non capturing group, starts with at least one lowercase alpha,
+  # followed by : and at least 1 and at most 2 forward slahses,
+  # just in case user enter incorrectly with one slash only.
+  # group 2) hostname ([^:/]+)?
+  # capturing group, first negating colon and forward slash, looking for
+  # any other characters, at least one or more.
+  # group 3) port (?::([0-9]+))?
+  # another "optional" non capturing group, starts with :, and captures at
+  # least one or more numerics.
+  # group 4) folder/path (/.*)?
+  # capturing group starts with a forward slash, followed by anything.
   pattern <- "^(?:([a-z]+:/{1,2}))?([^:/]+)?(?::([0-9]+))?(/.*)?$"
   matches <- regexec(pattern, user_url, perl = TRUE)
   # If empty, will return "" empty string, not NA
@@ -226,11 +251,13 @@
       regmatches(user_url, matches)[[1]][-1],
       c("protocol", "hostname", "port", "folder")
     )
+  hostname_confirmed <- nzchar(parts["protocol"]) || nzchar(parts["port"])
+  hostname_matched   <- parts["hostname"] == sftp_conn$clean_url$hostname
+  if (!hostname_confirmed && !hostname_matched) parts["folder"] <- user_url
+
   checks <- parts[-length(parts)] == sftp_conn$clean_url[2:4]
 
-  if (isTRUE(all(checks))) {
-    return(user_url)
-  }
+  if (isTRUE(all(checks))) return(user_url)
 
   # If mismatching sftp_conn$clean_url, print warning
   .verbose_msg(
