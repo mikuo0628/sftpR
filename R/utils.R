@@ -1,5 +1,7 @@
 .verbose_msg <- function(verbose = FALSE, msg = "") {
-  if (isTRUE(verbose)) { message(msg) }
+  if (isTRUE(verbose)) {
+    message(msg)
+  }
 }
 
 #' Build SFTP URL components
@@ -155,3 +157,42 @@
 
   return(url)
 }
+
+.validate_sftp_url <- function(sftp_conn, user_url) {
+  if (is.null(user_url) || user_url == "") {
+    stop("SFTP URL cannot be empty.")
+  }
+  # Check for Double-Slash (Root Access) Attempt
+  # In curl, sftp://host//path indicates root. We check for // after
+  # the authority or at start.
+  if (grepl("://[^/]*//", user_url) || grepl("^//", user_url)) {
+    warning(
+      paste(
+        "Root access attempt detected (//).",
+        "SFTP paths should be relative to your home directory for security.",
+        "Converting to relative path."
+      )
+    )
+  }
+
+  browser()
+  # Extract parts from user_input to check for incongruence
+  user_url <- "sftp://127.0.0.1:2222/upload/subdir/sub2/mtcars3.csv"
+  user_url <- "sftp:/127.0.0.1:2222/upload/subdir/sub2/mtcars3.csv"
+  pattern <- "^(?:([a-z]+:/{1,2}))?([^:/]+)?(?::([0-9]+))?(/.*)?$"
+  matches <- regexec(pattern, user_url, perl = TRUE)
+  parts <- regmatches(user_url, matches)[[1]][-1]
+  parts <- setNames(parts, c("protocol", "hostname", "port", "folder"))
+  parts[-length(parts)] == sftp_conn$clean_url[2:4]
+  sftp_conn$clean_url
+}
+
+# .validate_sftp_url(
+#   sftp_conn =
+#     sftp_connect$new(
+#       hostname = "sftp://127.0.0.1:2222/",
+#       username = "tester",
+#       password = "password123"
+#     ),
+#   "sftp://127.0.0.1:2222/upload/subdir/sub2/mtcars3.csv"
+# )
