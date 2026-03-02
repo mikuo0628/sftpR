@@ -63,13 +63,14 @@ sftp_connect <- R6::R6Class(
                password = NA_character_,
                timeout  = 30L,
                ...,
-               .verbose = FALSE) {
+               .verbose = TRUE) {
         .clean_url <-
           .build_sftp_url(
             protocol = protocol,
             hostname = hostname,
             port     = port,
-            folder   = folder
+            folder   = folder,
+            .verbose = .verbose
           )
 
         self$protocol    <- .clean_url$protocol
@@ -171,7 +172,7 @@ sftp_connect <- R6::R6Class(
         tempfile_used <- TRUE
         temp_local_file <- tempfile()
         .verbose_msg(
-          self$.verbose,
+          .verbose = self$.verbose,
           paste(
             sep = "\n",
             paste(
@@ -179,7 +180,8 @@ sftp_connect <- R6::R6Class(
               "not a path to a physical file."
             ),
             "It will be written to a temp file before uploading.",
-            sprintf("The temp file is: %s", temp_local_file)
+            sprintf("The temp file is: %s", temp_local_file),
+            warning
           )
         )
         try_write_temp_file <-
@@ -293,7 +295,8 @@ sftp_connect <- R6::R6Class(
         protocol = self$protocol,
         hostname = self$hostname,
         port     = self$port,
-        folder   = self$folder
+        folder   = self$folder,
+        .verbose = self$.verbose
       )
     }
   ),

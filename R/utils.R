@@ -30,6 +30,8 @@
 #'   Defaults to `NULL`, which directs to the root folder. The function will
 #'   sanitize `folder` of minor formatting issues, such as extra slashes, and
 #'   ensure a trailing slash if not NULL.
+#' @param .verbose logical. Defaults to `FALSE`. If `TRUE`, prints verbose
+#'   messages.
 #' @return A list with components: full_url, protocol, hostname, port, folder.
 #' @keywords internal
 .build_sftp_url <- function(
