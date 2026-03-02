@@ -143,7 +143,7 @@
 #' @param ... Additional path components to append.
 #' @param is_dir Logical. If TRUE, ensures a trailing slash.
 #' @keywords internal
-.url_path_join <- function(base_url, ..., is_dir = TRUE) {
+.join_url_path <- function(base_url, ..., is_dir = TRUE) {
   # 1. Clean the base URL of any trailing slashes
   url <- gsub("/+$", "", base_url)
 
