@@ -9,6 +9,85 @@
   )
 }
 
+#' Parse and Validate SFTP URL Components
+#'
+#' Internal utility to deconstruct an SFTP URL into its constituent parts
+#' (protocol, user, hostname, port, and path). It enforces security by
+#' disallowing absolute paths (indicated by double slashes) and performs
+#' basic sanitization.
+#'
+#' @param url A character string containing the SFTP URL.
+#'
+#' @param .verbose logical. Defaults to `FALSE`. Prints verbose messages.
+#'
+#' @return A named list containing:
+#'   \item{protocol}{The scheme (e.g., "sftp").}
+#'   \item{user}{The username if provided (e.g., "john").}
+#'   \item{hostname}{The server address (IPv4, IPv6, or domain).}
+#'   \item{port}{The port number as a string.}
+#'   \item{path}{The file or directory path relative to the home directory.}
+#'
+#' @details
+#' The function uses a single-pass regular expression to extract components.
+#' It specifically blocks "Root Access" attempts (e.g., `sftp://host//etc`)
+#' by checking if the captured path starts with a forward slash.
+#'
+#' @keywords internal
+#' @noRd
+.parse_sftp_url <- function(url, .verbose = TRUE) {
+  pattern <-
+    paste0(
+      # group 0) protocol, "optional" non capturing group
+      # starts with at least one lowercase
+      # alpha, followed by : and at least 0 and at most 2 forward slahses,
+      # just in case typo.
+      "^(?:([a-z]+):/{1,2})?",
+      # "^([a-z]+:/{1,2})?", # with ://
+      # group 1) user, "optional" NCG
+      "(?:([^@/]+)@)?",
+      # group 2) host, IPv6 in [] or hostname/IPv4
+      "(\\[[^\\]]+\\]|[^:/\\s]+)",
+      # group 3) port, "optional" NCG starts with : followed by digits
+      "(?::(\\d+))?",
+      # group 4) path, "optional" capturing group starts with a forward slash
+      # after host/port
+      "(?:/(/?.*))?$"
+    )
+
+  matches <- regexec(pattern, url, perl = TRUE)
+  # If empty, will return "" empty string, not NA
+  parts <-
+    setNames(
+      regmatches(url, matches)[[1]][-1],
+      c("protocol", "user", "hostname", "port", "path")
+    )
+
+  # if (nzchar(parts[["protocol"]]) && grepl(":/?$", parts[["protocol"]])) {
+  #   .verbose_msg(
+  #     .verbose = .verbose,
+  #     "Missing slashes will be added to `protocol`.",
+  #     warning
+  #   )
+  # }
+
+  if (isTRUE(grepl("^/|//", parts[["path"]]))) {
+    stop("Absolute paths using `//` are not supported.")
+  }
+
+  if (nzchar(parts[["user"]]) && grepl(":", parts[["user"]])) {
+    .verbose_msg(
+      .verbose = .verbose,
+      paste(
+        "Credentials detected in URL.",
+        "It is safer to use SSH keys or a keyring."
+      ),
+      warning
+    )
+  }
+
+  return(as.list(parts))
+}
+
 #' Build SFTP URL components
 #'
 #' Helper to construct a full SFTP URL and its components from the given
