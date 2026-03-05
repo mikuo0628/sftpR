@@ -19,7 +19,7 @@
 #' sftp_conn <- sftp_connect$new(
 #'   hostname = "127.0.0.1",
 #'   port     = 2222,
-#'   username = "tester",
+#'   user     = "tester",
 #'   password = "password123",
 #' }
 #'
@@ -31,8 +31,8 @@ sftp_connect <- R6::R6Class(
     protocol = "sftp://",
     #' @field hostname The server address or IP.
     hostname = "localhost",
-    #' @field folder The target subdirectory on the server.
-    folder = NULL,
+    #' @field path The target subdirectory on the server.
+    path = NULL,
     #' @field port The port number (defaults to 22).
     port = 22L,
     #' @field timeout Connection timeout in seconds.
@@ -46,20 +46,20 @@ sftp_connect <- R6::R6Class(
     #' Create a new SFTP connection object.
     #' @param protocol Character. Protocol string.
     #' @param hostname Character. Server URL or IP.
-    #' @param folder Character. Sub-path on server.
+    #' @param path Character. Sub-path on server.
     #' @param port Integer. Port number.
-    #' @param username Character. SFTP account name.
+    #' @param user Character. SFTP account name.
     #' @param password Character. SFTP password.
     #' @param timeout Integer. Connection timeout.
     #' @param .verbose Logical. Toggle verbose output.
     #' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
     #' @return A new `SFTPConn` object.
     initialize =
-      function(protocol = "sftp://",
+      function(protocol = "sftp",
                hostname = "localhost",
-               folder   = NULL,
+               path     = NULL,
                port     = 22L,
-               username = NA_character_,
+               user     = NA_character_,
                password = NA_character_,
                timeout  = 30L,
                ...,
@@ -67,19 +67,20 @@ sftp_connect <- R6::R6Class(
         .clean_url <-
           .build_sftp_url(
             protocol = protocol,
+            user     = user,
             hostname = hostname,
             port     = port,
-            folder   = folder,
+            path     = path,
             .verbose = .verbose
           )
 
         self$protocol    <- .clean_url$protocol
         self$hostname    <- .clean_url$hostname
-        self$folder      <- .clean_url$folder
+        self$path        <- .clean_url$path
         self$port        <- .clean_url$port
         self$timeout     <- timeout
         self$.verbose    <- .verbose
-        private$username <- username
+        private$user     <- .clean_url$user
         private$password <- password
 
         # check protocol "sftp" exists
@@ -92,7 +93,7 @@ sftp_connect <- R6::R6Class(
         h <- curl::new_handle()
         curl::handle_setopt(
           h,
-          userpwd = paste0(private$username, ":", private$password),
+          userpwd = paste0(private$user, ":", private$password),
           ssh_auth_types = 2,
           verbose = .verbose,
           ...
@@ -268,7 +269,7 @@ sftp_connect <- R6::R6Class(
           # from curl::curl_upload()'s handle settings
           seekfunction = function(offset) seek(file_conn, where = offset),
           forbid_reuse = !isTRUE(reuse),
-          userpwd = paste0(private$username, ":", private$password),
+          userpwd = paste0(private$user, ":", private$password),
           ssh_auth_types = 2,
           verbose = self$.verbose,
           ...
@@ -293,15 +294,16 @@ sftp_connect <- R6::R6Class(
     clean_url = function() {
       .build_sftp_url(
         protocol = self$protocol,
+        user     = private$user,
         hostname = self$hostname,
         port     = self$port,
-        folder   = self$folder,
+        path     = self$path,
         .verbose = self$.verbose
       )
     }
   ),
   private = list(
-    username = NA_character_,
+    user     = NA_character_,
     password = NA_character_
   )
 )
