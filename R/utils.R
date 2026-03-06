@@ -90,9 +90,10 @@
 
 #' Build SFTP URL components
 #'
-#' Helper to construct a full SFTP URL and its components from the given
-#' protocol, hostname, port, and folder. Hostname will be sanitized for minor
-#' formatting issues; if a port or folder are found inside `hostname` they will
+#' Helper (stateless) function to construct a full SFTP URL and
+#' its components from the given protocol, hostname, port, and path
+#' Hostname will be sanitized for minor formatting issues;
+#' if a port or path are found inside `hostname` they will
 #' override the corresponding arguments.
 #'
 #' @param protocol single element vector of the protocol designation. Defaults
@@ -100,153 +101,108 @@
 #' @param hostname single element character vector of hostname URL or IP
 #'   address. The function will sanitize `hostname` of minor formatting issues,
 #'   such as extra slashes. If a port is included in the `hostname`, it will
-#'   override the `port` argument. If a folder path is included in the
-#'   `hostname`, it will override the `folder` argument.
+#'   override the `port` argument. If a path is included in the
+#'   `hostname`, it will override the `path` argument.
 #' @param port single element integer vector. Defaults to `22`. Will be
 #'   overwritten if a port is present in `hostname`.
-#' @param folder single element character vector of the folder sub-path. Can
+#' @param path single element character vector of the path/sub-path. Can
 #'   be multiple sub levels, e.g. `dir_1/dir_2/dir_3`. Case-sensitive.
-#'   Defaults to `NULL`, which directs to the root folder. The function will
-#'   sanitize `folder` of minor formatting issues, such as extra slashes, and
+#'   Defaults to `NULL`, which directs to the root directory The function will
+#'   sanitize `path` of minor formatting issues, such as extra slashes, and
 #'   ensure a trailing slash if not NULL.
-#' @param .verbose logical. Defaults to `FALSE`. If `TRUE`, prints verbose
-#'   messages.
-#' @return A list with components: full_url, protocol, hostname, port, folder.
+#' @param .verbose logical. Defaults to `FALSE`. Prints verbose messages.
+#'
+#' @return A list with components: full_url, protocol, hostname, port, path.
 #' @keywords internal
+#' @noRd
 .build_sftp_url <- function(
-    protocol, hostname, port, folder = NULL, .verbose = FALSE) {
-  # clean URL components
-  regex_hostname <-
-    paste0(
-      # start of string
-      "^",
-      # optional non-cap grp matching "sftp://"
-      "(?:sftp://)?",
-      # optional non-cap grp matching "user@"
-      "(?:[^@/]+@)?",
-      # main non-cap grp choosing between bracketed IPv6 or normal host
-      "(?:",
-      # matches [...] (bracketed IPv6)
-      "\\[([^\\]]+)\\]",
-      "|",
-      # capture grp 2 matching hostname or IPv4 (run until `:` or `/` or ws)
-      "([^:/\\s]+)",
-      ")",
-      # optional non-cap grp matching ":port"
-      "(?:\\:(\\d+))?"
-      # # consume the rest (port, folder path, etc)
-      # c(
-      #   hostname = ".*$",
-      #   folder = "(?:/([^?#]*))?"
-      # )
-    )
+    protocol = "sftp",
+    user = NULL,
+    hostname = NULL,
+    port = "22",
+    path = NULL,
+    .verbose = TRUE) {
+  ## list arg values
+  list_args <- as.list(environment())
 
-  ## protocol: auto clean up symbols
-  protocol <- paste0(regmatches(protocol, regexpr("\\w+", protocol)), "://")
-  ## port: overwrite if found in hostname
-  regex_port <- regexpr("(?<=:)\\d+", hostname, perl = TRUE)
-  if (regex_port[1] != -1) {
-    .verbose_msg(
-      .verbose = .verbose,
-      paste(
-        "'Port' found in hostname.",
-        "Overwriting `port` argument with value from `hostname`."
-      ),
-      warning
-    )
-    port <- regmatches(hostname, regex_port)
-  }
+  ## protocol: remove up symbols
+  list_args$protocol <-
+    regmatches(list_args$protocol, regexpr("\\w+", list_args$protocol))
 
-  ## folder: clean up leading/trailing slashes, replace multiple with single
-  regex_folder <-
-    regexec(
-      paste0(regex_hostname, "(?:/([^?#]*))?$"),
-      hostname,
-      perl = TRUE
-    )
-  hostname_folder <- tail(unlist(regmatches(hostname, regex_folder)), 1)
-  if (nchar(hostname_folder) > 1) {
-    if (!is.null(folder)) {
+  ## extract URL components
+  list_parsed <- .parse_sftp_url(hostname)
+
+  ## list_args[[part]] = "",  list_parse[[part]] = "",  do nothing
+  ## list_args[[part]] = "x", list_parse[[part]] = "",  do nothing
+  ## list_args[[part]] = "x", list_parse[[part]] = "x", do nothing
+  ## list_args[[part]] = "",  list_parse[[part]] = "x", replace arg, warn
+  ## list_args[[part]] = "x", list_parse[[part]] = "y", replace arg, warn
+
+  for (part in names(list_parsed[nzchar(list_parsed)])) {
+    if (isTRUE(list_parsed[[part]] != list_args[[part]])) {
+      if (part == "user") {
+        .verbose_msg(
+          .verbose = .verbose,
+          sprintf(
+            paste(
+              "A user name is detected in your hostname",
+              "that is different than the `user` argument.",
+              "\nIt is more preferrable to use the `user` argument over",
+              "\"user@hostname\" format."
+            )
+          ),
+          warning
+        )
+      }
       .verbose_msg(
-        .verbose = .verbose,
-        paste(
-          "Folder path found in hostname.",
-          "Overwriting `folder` argument with value from `hostname`."
+        .verbose = ifelse(part == "hostname", FALSE, .verbose),
+        sprintf(
+          paste0(
+            "`%s` found in argument `hostname`. ",
+            "Overwriting existing argument `%s` value: \"%s\" -> \"%s\""
+          ),
+          part, part, list_args[[part]], list_parsed[[part]]
         ),
         warning
       )
     }
-    folder <- hostname_folder
-  }
-  if (!is.null(folder)) {
-    folder <- paste0(gsub("/+", "/", gsub("^/+|/+$", "", folder)), "/")
+    # assign(x = part, value = list_parsed[[part]])
+    list_args[[part]] <- list_parsed[[part]]
   }
 
-  ## hostname: account for IPv6, IPv4, forward slashes, protocol, and port
-  hostname <-
-    tail(
-      unlist(
-        regmatches(
-          hostname,
-          regexec(paste0(regex_hostname, ".*$"), hostname, perl = TRUE)
-        )
-      ),
-      2
-    )[1]
+  list_args <-
+    lapply(
+      list_args,
+      FUN = \(x) if (is.null(x)) NULL else gsub("^\\W+|\\W+$", "", x)
+    )
 
   full_url <-
-    .url_path_join(
-      base_url = paste0(protocol, hostname, ":", port),
-      folder,
-      is_dir = !is.null(folder)
+    paste0(
+      list_args$protocol, "://",
+      # if (!is.null(list_args$user)) paste0(list_args$user, "@") else NULL,
+      list_args$hostname,
+      if (!is.null(list_args$port)) paste0(":", list_args$port) else NULL,
+      "/",
+      list_args$path
     )
 
   return(
-    list(
-      full_url = full_url,
-      protocol = protocol,
-      hostname = hostname,
-      port     = port,
-      folder   = folder
+    lapply(
+      append(
+        list(
+          full_url = full_url
+        ),
+        list_args
+      ),
+      FUN = function(x) {
+        if (is.null(x)) {
+          return(NULL)
+        } else {
+          return(as.character(x))
+        }
+      }
     )
   )
-}
-
-#' Join URL components safely
-#'
-#' @description
-#' Internal helper to join a base URL and a subdirectory without
-#' doubling slashes or losing the protocol.
-#'
-#' @param base_url The base SFTP string (e.g., "sftp://host").
-#' @param ... Additional path components to append.
-#' @param is_dir Logical. If TRUE, ensures a trailing slash.
-#' @keywords internal
-.join_url_path <- function(base_url, ..., is_dir = TRUE) {
-  # 1. Clean the base URL of any trailing slashes
-  url <- gsub("/+$", "", base_url)
-
-  # 2. Process and clean all subcomponents
-  components <- rlang::list2(...)
-  components <- unlist(lapply(components, function(x) {
-    if (is.null(x) || x == "") {
-      return(NULL)
-    }
-    # Remove leading and trailing slashes from parts
-    gsub("^/|/$", "", x)
-  }))
-
-  # 3. Join with single slashes
-  if (length(components) > 0) {
-    url <- paste(c(url, components), collapse = "/")
-  }
-
-  # 4. Enforce trailing slash for directories (Required for SFTP listing)
-  if (is_dir && !grepl("/$", url)) {
-    url <- paste0(url, "/")
-  }
-
-  return(url)
 }
 
 #' Validate and Sanitize SFTP URLs against a Connection Object
