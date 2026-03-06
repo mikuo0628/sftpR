@@ -216,6 +216,7 @@
 #' @param sftp_conn An `R6` object of class `SFTPConn`.
 #' @param user_url
 #'   Character string. The destination SFTP URL or path provided by the user.
+#' @param .verbose logical. Defaults to `FALSE`. Prints verbose messages.
 #'
 #' @details
 #' The function performs the following steps:
@@ -234,7 +235,7 @@
 #'
 #' @keywords internal
 #' @noRd
-.validate_sftp_url <- function(sftp_conn, user_url) {
+.validate_sftp_url <- function(sftp_conn, user_url, .verbose = TRUE) {
   if (is.null(user_url) || user_url == "") {
     stop("SFTP URL cannot be empty.")
   }
@@ -261,68 +262,40 @@
   }
 
   # Extract parts from user_input to check for incongruence
-  # Cases:
-  # "sftp://127.0.0.1:2222/upload/mtcars.csv" # full path
-  # "sftp:/127.0.0.1:2222/upload/mtcars.csv"  # typo in protocol
-  # "127.0.0.1:2222/upload/mtcars.csv"        # no protocol
-  # "127.0.0.1/upload/mtcars.csv"             # no port
-  # "/upload/mtcars.csv"                      # just relative path
-  # "upload/mtcars.csv"                       # relative path w/o leading slash
-  # group 1) protocol (?:([a-z]+:/{1,2}))?
-  # "optional" non capturing group, starts with at least one lowercase alpha,
-  # followed by : and at least 1 and at most 2 forward slahses,
-  # just in case user enter incorrectly with one slash only.
-  # group 2) hostname ([^:/]+)?
-  # capturing group, first negating colon and forward slash, looking for
-  # any other characters, at least one or more.
-  # group 3) port (?::([0-9]+))?
-  # another "optional" non capturing group, starts with :, and captures at
-  # least one or more numerics.
-  # group 4) folder/path (/.*)?
-  # capturing group starts with a forward slash, followed by anything.
-  pattern <- "^(?:([a-z]+:/{1,2}))?([^:/]+)?(?::([0-9]+))?(/.*)?$"
-  matches <- regexec(pattern, user_url, perl = TRUE)
-  # If empty, will return "" empty string, not NA
-  parts <-
-    setNames(
-      regmatches(user_url, matches)[[1]][-1],
-      c("protocol", "hostname", "port", "folder")
-    )
+  parts <- .parse_sftp_url(user_url)
   hostname_confirmed <- nzchar(parts["protocol"]) || nzchar(parts["port"])
-  hostname_matched   <- parts["hostname"] == sftp_conn$clean_url$hostname
-  if (!hostname_confirmed && !hostname_matched) parts["folder"] <- user_url
+  hostname_matched <- parts["hostname"] == sftp_conn$clean_url$hostname
 
-  checks <- parts[-length(parts)] == sftp_conn$clean_url[2:4]
+  if (!hostname_confirmed && !hostname_matched) parts["path"] <- user_url
 
-  if (isTRUE(all(checks))) return(user_url)
+  checks <-
+    unlist(parts[-which(names(parts) %in% c("user", "path"))]) ==
+    unlist(sftp_conn$clean_url[2:4])
 
-  # If mismatching sftp_conn$clean_url, print warning
-  .verbose_msg(
-    .verbose = sftp_conn$.verbose,
-    sprintf(
-      paste(
-        "\nThe following parts of the provided SFTP URL do not match the",
-        "connection:\n%s\n",
-        "\nThey will be replaced by the respective parts in `sftp_conn`."
+  if (!isTRUE(all(checks))) {
+    # If mismatching sftp_conn$clean_url, print warning
+    .verbose_msg(
+      .verbose = sftp_conn$.verbose,
+      sprintf(
+        paste(
+          "\nThe following parts of the provided SFTP URL do not match the",
+          "connection:\n%s\n",
+          "\nThey will be replaced by the respective parts in `sftp_conn`."
+        ),
+        paste("  -", names(which(checks == FALSE)), collapse = "\n")
       ),
-      paste("  -", names(which(checks == FALSE)), collapse = "\n")
-    ),
-    warning
-  )
+      warning
+    )
 
-  # Replace the mismatched with the appropriate valuess from sftp_conn$clean_url
-  for (part in names(which(checks == FALSE))) {
-    parts[part] <- sftp_conn$clean_url[[part]]
+    # Replace the mismatched with the appropriate valuess
+    # from sftp_conn$clean_url
+    for (part in names(which(checks == FALSE))) {
+      parts[part] <- sftp_conn$clean_url[[part]]
+    }
   }
 
   user_url <-
-    paste0(
-      parts["protocol"],
-      parts["hostname"],
-      paste0(":", parts["port"]),
-      "/",
-      gsub("^/|/$", "", parts["folder"], perl = TRUE)
-    )
+    do.call(.build_sftp_url, parts[-which(names(parts) == "user")])$full_url
 
   return(user_url)
 }
