@@ -45,8 +45,8 @@
       # "^([a-z]+:/{1,2})?", # with ://
       # group 1) user, "optional" NCG
       "(?:([^@/]+)@)?",
-      # group 2) host, IPv6 in [] or hostname/IPv4
-      "(\\[[^\\]]+\\]|[^:/\\s]+)",
+      # group 2) host, "optional", IPv6 in [] or hostname/IPv4
+      "(\\[[^\\]]+\\]|[^:/\\s]+)?",
       # group 3) port, "optional" NCG starts with : followed by digits
       "(?::(\\d+))?",
       # group 4) path, "optional" capturing group starts with a forward slash
