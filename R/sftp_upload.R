@@ -1,3 +1,43 @@
+#' Upload a file to an SFTP server
+#'
+#' @description
+#' A robust wrapper to upload local files or data frames to a remote SFTP server.
+#' It manages the libcurl handle lifecycle, ensures connections are closed, 
+#' and validates URLs against the connection's "Source of Truth".
+#'
+#' @param sftp_conn An \code{SFTPConn} R6 object, created by \code{sftp_connect}.
+#' 
+#' @param local_file Character string (path to a file) or a \code{data.frame}. 
+#'   Data frames are automatically written to a temp file before upload.
+#'   The temp file will automatically be cleaned up at the end of function.
+#' 
+#' @param remote_file Character string. The destination path on the server. 
+#'   If \code{NULL}, attempts to use the basename of the `local_file`.
+#' 
+#' @param .create_dir Logical. If \code{TRUE}, recursively creates missing 
+#'   remote directories in the path (\code{CURLOPT_FTP_CREATE_MISSING_DIRS}).
+#' 
+#' @param .verbose Logical. Should progress messages and URL validation 
+#'   warnings be displayed?
+#'
+#' @return
+#'   Returns \code{TRUE} (invisibly) on success. Throws an error on failure.
+#'
+#' @details 
+#' The function uses a secure lifecycle:
+#' \enumerate{
+#'   \item Validates the remote URL to prevent credential leakage.
+#'   \item Opens a file connection to the local source.
+#'   \item Uses \code{on.exit} to ensure file handles are released and 
+#'         temporary files are unlinked even if the transfer is interrupted.
+#' }
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' conn <- sftp_connect$new(hostname = "sftp.example.com", user = "user")
+#' sftp_upload(conn, my_df, "uploads/data.csv")
+#' }
 sftp_upload <- function(
     sftp_conn,
     local_file,
