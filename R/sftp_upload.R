@@ -5,6 +5,7 @@ sftp_upload <- function(
     .create_dir = FALSE,
     .verbose = TRUE) {
   # 1) Sanitize and check `remote_file`: should be relative
+  if (is.null(remote_file)) remote_file <- basename(match.call()$local_file)
   remote_file <- 
     .validate_sftp_url(sftp_conn = sftp_conn, remote_file,  .verbose = .verbose)
 
