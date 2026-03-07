@@ -96,6 +96,7 @@ sftp_connect <- R6::R6Class(
           userpwd = paste0(private$user, ":", private$password),
           ssh_auth_types = 2,
           verbose = .verbose,
+          timeout = self$timeout,
           ...
         )
         self$h <- h
@@ -117,7 +118,6 @@ sftp_connect <- R6::R6Class(
     #' @return Logical; TRUE if connection is successful.
     connection_ok = function() {
       status <- TRUE
-      # host check
       host_check <-
         try(
           silent = TRUE,
@@ -161,132 +161,134 @@ sftp_connect <- R6::R6Class(
     #' @param local_file Path to file, data.frame, or connection.
     #' @param reuse Logical; try to keep connection alive.
     #' @param ... Additional options for \code{curl::handle_setopt()}.
-    .upload_handle = function(local_file, reuse = TRUE, ...) {
-      # check if `local_file` exists
-      tempfile_used <- FALSE
-      if (is.character(local_file)) {
-        if (!file.exists(local_file)) {
-          stop("Provided `local_file` does not exist.")
-        }
-      } else {
-        # if `local_file` is data, write it to a temp file
-        tempfile_used <- TRUE
-        temp_local_file <- tempfile()
-        .verbose_msg(
-          .verbose = self$.verbose,
-          paste(
-            sep = "\n",
+    .upload_handle = 
+      function(local_file, reuse = TRUE, .verbose = self$.verbose, ...) {
+        # check if `local_file` exists
+        tempfile_used <- FALSE
+        if (is.character(local_file)) {
+          if (!file.exists(local_file)) {
+            stop("Provided `local_file` does not exist.")
+          }
+        } else {
+          # if `local_file` is data, write it to a temp file
+          tempfile_used <- TRUE
+          temp_local_file <- tempfile()
+          .verbose_msg(
+            .verbose = .verbose,
             paste(
-              "Provided `local_file` is a data object,",
-              "not a path to a physical file."
+              sep = "\n",
+              paste(
+                "= Provided `local_file` is a data object,",
+                "not a path to a physical file."
+              ),
+              "== It will be written to a temp file before uploading.",
+              sprintf("== The temp file is: %s", temp_local_file)
             ),
-            "It will be written to a temp file before uploading.",
-            sprintf("The temp file is: %s", temp_local_file),
             warning
           )
-        )
-        try_write_temp_file <-
-          try(
-            silent = TRUE,
-            utils::write.csv(x = local_file, file = temp_local_file)
-          )
-        if (inherits(try_write_temp_file, "try-error")) {
-          stop(
-            "The data in `local_file` cannot be written to a temporary file."
-          )
-        }
-        # update `local_file` to point to the temp file location
-        local_file <- temp_local_file
-      }
-      file_conn <-
-        if (is.character(local_file)) {
-          local_file <- normalizePath(local_file, mustWork = TRUE)
-          infilesize <- file.info(local_file)$size
-          base::file(local_file, open = "rb")
-        } else if (inherits(local_file, "connection")) {
-          local_file
-        } else {
-          stop(
-            paste(
-              "`local_file` must be a data.frame,",
-              "character path or a connection object."
+          try_write_temp_file <-
+            try(
+              silent = TRUE,
+              utils::write.csv(x = local_file, file = temp_local_file)
             )
+          if (inherits(try_write_temp_file, "try-error")) {
+            stop(
+              "The data in `local_file` cannot be written to a temporary file."
+            )
+          }
+          # update `local_file` to point to the temp file location
+          local_file <- temp_local_file
+        }
+        file_conn <-
+          if (is.character(local_file)) {
+            local_file <- normalizePath(local_file, mustWork = TRUE)
+            infilesize <- file.info(local_file)$size
+            base::file(local_file, open = "rb")
+          } else if (inherits(local_file, "connection")) {
+            local_file
+          } else {
+            stop(
+              paste(
+                "`local_file` must be a data.frame,",
+                "character path or a connection object."
+              )
+            )
+          }
+
+        # private states for tracking upload progress
+        bytes_sent <- 0
+        last_reported_ten <- -1
+        # create upload handle with streaming read and seek functions
+        h <-
+          curl::new_handle(
+            upload = TRUE,
+            filetime = FALSE,
+
+            # adopted callback mechanism
+            # from curl::curl_upload()'s handle settings
+            readfunction = function(n) {
+              buffer <- readBin(file_conn, what = raw(), n = n)
+              len_buffer <- length(buffer)
+
+              bytes_sent <<- bytes_sent + length(buffer)
+
+              # progress bar: 10% increments
+              if (!is.na(infilesize) && infilesize > 0) {
+                ## calculate progress percentage
+                perc_complete <- bytes_sent / infilesize
+                curr_ten <- floor(floor(perc_complete * 100) / 10) * 10
+
+                if (.verbose && curr_ten > last_reported_ten) {
+                  last_reported_ten <<- curr_ten
+                  bar_width <- curr_ten / 10
+                  bar <-
+                    paste0(
+                      "[",
+                      strrep("=", bar_width),
+                      strrep(" ", 10 - bar_width),
+                      "]"
+                    )
+                  cat(
+                    sprintf(
+                      "\n\rUploading: %s %d%% (Total filesize: %.2f MB)\n\n",
+                      bar, curr_ten, infilesize / (1024 ^ 2)
+                    )
+                  )
+                  utils::flush.console()
+                }
+              }
+
+              # Final "All Done" cleanup
+              if (len_buffer == 0 && .verbose) {
+                cat("\nUpload Complete.\n", file = stderr())
+              }
+
+              return(buffer)
+            },
+
+            # adopted "rewind" mechanism
+            # from curl::curl_upload()'s handle settings
+            seekfunction = function(offset) seek(file_conn, where = offset),
+            forbid_reuse = !isTRUE(reuse),
+            userpwd = paste0(private$user, ":", private$password),
+            ssh_auth_types = 2,
+            timeout = self$timeout,
+            verbose = .verbose,
+            ...
           )
+
+        if (!is.na(infilesize)) {
+          curl::handle_setopt(h, infilesize_large = infilesize)
         }
 
-      # private states for tracking upload progress
-      bytes_sent <- 0
-      last_reported_ten <- -1
-      # create upload handle with streaming read and seek functions
-      h <-
-        curl::new_handle(
-          upload = TRUE,
-          filetime = FALSE,
-
-          # adopted callback mechanism
-          # from curl::curl_upload()'s handle settings
-          readfunction = function(n) {
-            buffer <- readBin(file_conn, what = raw(), n = n)
-            len_buffer <- length(buffer)
-
-            bytes_sent <<- bytes_sent + length(buffer)
-
-            # progress bar: 10% increments
-            if (!is.na(infilesize) && infilesize > 0) {
-              ## calculate progress percentage
-              perc_complete <- bytes_sent / infilesize
-              curr_ten <- floor(floor(perc_complete * 100) / 10) * 10
-
-              if (self$.verbose && curr_ten > last_reported_ten) {
-                last_reported_ten <<- curr_ten
-                bar_width <- curr_ten / 10
-                bar <-
-                  paste0(
-                    "[",
-                    strrep("=", bar_width),
-                    strrep(" ", 10 - bar_width),
-                    "]"
-                  )
-                cat(
-                  sprintf(
-                    "\rUploading: %s %d%% (Total filesize: %.2f MB)",
-                    bar, curr_ten, infilesize / (1024 ^ 2)
-                  )
-                )
-                utils::flush.console()
-              }
-            }
-
-            # Final "All Done" cleanup
-            if (len_buffer == 0 && self$.verbose) {
-              cat("\nUpload Complete.\n", file = stderr())
-            }
-
-            return(buffer)
-          },
-
-          # adopted "rewind" mechanism
-          # from curl::curl_upload()'s handle settings
-          seekfunction = function(offset) seek(file_conn, where = offset),
-          forbid_reuse = !isTRUE(reuse),
-          userpwd = paste0(private$user, ":", private$password),
-          ssh_auth_types = 2,
-          verbose = self$.verbose,
-          ...
+        return(
+          list(
+            h = h,
+            file_conn = file_conn,
+            tempfile = if (isTRUE(tempfile_used)) local_file else NULL
+          )
         )
-
-      if (!is.na(infilesize)) {
-        curl::handle_setopt(h, infilesize_large = infilesize)
       }
-
-      return(
-        list(
-          h = h,
-          file_conn = file_conn,
-          tempfile = if (isTRUE(tempfile_used)) local_file else NULL
-        )
-      )
-    }
   ),
   active = list(
     #' @field clean_url Returns the processed SFTP URL via internal
