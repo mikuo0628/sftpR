@@ -6,7 +6,7 @@ sftp_upload <- function(
     .verbose = TRUE) {
   on.exit(close(upload_h$file_con), add = TRUE)
   on.exit(
-    if (is.null(!(upload_h$tempfile))) unlink(upload_h$tempfile),
+    if (!is.null(upload_h$tempfile)) unlink(upload_h$tempfile),
     add = TRUE
   )
   browser()
@@ -45,15 +45,3 @@ sftp_upload <- function(
     message("Upload successful!")
   }
 }
-
-# sftp_upload(
-#   sftp_conn =
-#     sftp_connect$new(
-#       hostname = "sftp://127.0.0.1:2222/",
-#       username = "tester",
-#       password = "password123"
-#     ),
-#   local_file = mtcars,
-#   remote_file = "upload/mtcars.csv",
-#   .verbose = TRUE
-# )
