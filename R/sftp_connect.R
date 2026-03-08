@@ -9,7 +9,7 @@
 #' The class uses a "streaming" upload mechanism (via \code{readfunction}) to
 #' handle large files efficiently without loading them entirely into memory.
 #'
-#' @return 
+#' @return
 #' An `SFTPConn` object with methods for connection management and
 #' file uploads.
 #'
@@ -90,16 +90,7 @@ sftp_connect <- R6::R6Class(
         }
 
         # create base handle
-        h <- curl::new_handle()
-        curl::handle_setopt(
-          h,
-          userpwd = paste0(private$user, ":", private$password),
-          ssh_auth_types = 2,
-          verbose = .verbose,
-          timeout = self$timeout,
-          ...
-        )
-        self$h <- h
+        self$h <- private$.base_handle(...)
 
         # Check initial connection
         if (isFALSE(self$connection_ok())) {
@@ -161,7 +152,7 @@ sftp_connect <- R6::R6Class(
     #' @param local_file Path to file, data.frame, or connection.
     #' @param reuse Logical; try to keep connection alive.
     #' @param ... Additional options for \code{curl::handle_setopt()}.
-    .upload_handle = 
+    .upload_handle =
       function(local_file, reuse = TRUE, .verbose = self$.verbose, ...) {
         # check if `local_file` exists
         tempfile_used <- FALSE
@@ -220,7 +211,7 @@ sftp_connect <- R6::R6Class(
         last_reported_ten <- -1
         # create upload handle with streaming read and seek functions
         h <-
-          curl::new_handle(
+          private$.base_handle(
             upload = TRUE,
             filetime = FALSE,
 
@@ -270,10 +261,6 @@ sftp_connect <- R6::R6Class(
             # from curl::curl_upload()'s handle settings
             seekfunction = function(offset) seek(file_conn, where = offset),
             forbid_reuse = !isTRUE(reuse),
-            userpwd = paste0(private$user, ":", private$password),
-            ssh_auth_types = 2,
-            timeout = self$timeout,
-            verbose = .verbose,
             ...
           )
 
@@ -306,6 +293,19 @@ sftp_connect <- R6::R6Class(
   ),
   private = list(
     user     = NA_character_,
-    password = NA_character_
+    password = NA_character_,
+    .base_handle =
+      function(..., .verbose = self$.verbose) {
+        h <- curl::new_handle()
+        curl::handle_setopt(
+          h,
+          userpwd = paste0(private$user, ":", private$password),
+          ssh_auth_types = 2,
+          verbose = .verbose,
+          timeout = self$timeout,
+          ...
+        )
+        return(h)
+      }
   )
 )
