@@ -324,8 +324,8 @@ sftp_connect <- R6::R6Class(
     }
   ),
   private = list(
-    user     = NA_character_,
-    password = NA_character_,
+    user         = NA_character_,
+    password     = NA_character_,
     .base_handle =
       function(..., .verbose = self$.verbose) {
         h <- curl::new_handle()
@@ -338,6 +338,61 @@ sftp_connect <- R6::R6Class(
           ...
         )
         return(h)
+      },
+    #' URL "fixing" via range probing
+    #'
+    #' @description
+    #' An internal diagnostic method that determines if a remote URL requires a
+    #' trailing slash by attempting to read a single byte (Range: 0-0).
+    #'
+    #' @details
+    #' This method leverages a protocol behavior:
+    #' \itemize{
+    #'   \item \strong{Files} allow byte-range requests; the probe succeeds.
+    #'   \item \strong{Directories} reject byte-range requests; the probe fails.
+    #' }
+    #'
+    #' If the initial probe fails, the method "flips" the trailing slash
+    #'   (adds one if missing, or removes one if present) and returns the
+    #'   modified URL. This addresses the common `libcurl` issue where directory
+    #'   listings fail without an explicit trailing slash.
+    #'
+    #' @param remote_url Character. The full SFTP/FTP URL to validate.
+    #'
+    #' @return A character string containing the "fixed" URL. Note that if the
+    #'   path truly does not exist, the flipped URL is still returned; the final
+    #'   operation (upload/list) will handle the ultimate failure.
+    #'
+    #' @note This method uses a 5-second \code{connecttimeout} to ensure
+    #'   the probe doesn't hang on unresponsive servers.
+    #'
+    #' @keyword internal
+    #' @noRd
+    .fix_url_type =
+      function(remote_url) {
+        # requesting the first byte of data (CURLOPT_RANGE 0-0)
+        ## only works if URL is a file, and will reject request if URL is dir
+        h <- private$.base_handle(range = "0-0", connecttimeout = 5)
+
+        accessible <-
+          !inherits(
+            try(
+              curl::curl_fetch_memory(url = remote_url, h = h),
+              silent = TRUE
+            ),
+            "try-error"
+          )
+
+        if (isTRUE(accessible)) return(remote_url)
+
+        remote_url <-
+          ifelse(
+            grepl("/$", remote_url),
+            gsub("/$", "", remote_url),
+            paste0(remote_url, "/")
+          )
+
+        return(remote_url)
       }
   )
 )
