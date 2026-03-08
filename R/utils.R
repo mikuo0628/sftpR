@@ -268,28 +268,39 @@
 
   if (!hostname_confirmed && !hostname_matched) parts["path"] <- user_url
 
+  # If parts are empty, replace with sftp_conn, silently
+  for (part in names(parts[which(!nzchar(parts))])) {
+    parts[[part]] <- sftp_conn$clean_url[[part]]
+  }
+
   checks <-
-    unlist(parts[-which(names(parts) %in% c("user", "path"))]) ==
-    unlist(sftp_conn$clean_url[2:4])
+    unlist(parts[c("protocol", "hostname", "port")]) ==
+      unlist(sftp_conn$clean_url[c("protocol", "hostname", "port")])
 
   if (!isTRUE(all(checks))) {
-    # If mismatching sftp_conn$clean_url, print warning
-    .verbose_msg(
-      .verbose = sftp_conn$.verbose,
-      sprintf(
-        paste(
-          "\nThe following parts of the provided SFTP URL do not match the",
-          "connection:\n%s\n",
-          "\nThey will be replaced by the respective parts in `sftp_conn`."
-        ),
-        paste("  -", names(which(checks == FALSE)), collapse = "\n")
-      ),
-      warning
-    )
-
     # Replace the mismatched with the appropriate valuess
-    # from sftp_conn$clean_url
+    # from sftp_conn$clean_url, print warning
     for (part in names(which(checks == FALSE))) {
+      .verbose_msg(
+        .verbose = sftp_conn$.verbose,
+        sprintf(
+          paste(
+            "\nThe following parts parsed form the provided SFTP URL",
+            "do not match the `SFTPConn` connection,",
+            "and will be replaced:\n%s\n"
+          ),
+          paste0(
+            "  - ", names(which(checks == FALSE)), ": ",
+            sprintf(
+              "\"%s\" ===> \"%s\"",
+              parts[[part]], sftp_conn$clean_url[[part]]
+            ),
+            collapse = "\n"
+          )
+        ),
+        warning
+      )
+
       parts[part] <- sftp_conn$clean_url[[part]]
     }
   }
