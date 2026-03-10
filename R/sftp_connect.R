@@ -307,6 +307,48 @@ sftp_connect <- R6::R6Class(
             ...
           )
         return(h)
+      },
+
+    #' Check if a remote path exists
+    #'
+    #' @description
+    #' An internal helper that pings the SFTP/FTP server to verify
+    #' the existence of a file or directory.
+    #'
+    #' @details
+    #' This method uses \code{CURLOPT_NOBODY = TRUE} to perform a
+    #' protocol-level \code{STAT} request. This is highly efficient
+    #' as it retrieves only metadata and does not attempt to download or
+    #' list contents.
+    #'
+    #' Because \code{STAT} is slash-agnostic in the SFTP protocol, this check
+    #' will return \code{TRUE} for a directory regardless of whether a trailing
+    #' forward-slash is provided in the URL.
+    #'
+    #' However, this is the only operation where URL is "safe" from the
+    #' consequences of un-normalized URLs. Be wary of incorrect multiple
+    #' slash placements as they will be collapsed into one slash and won't
+    #' throw errors.
+    #'
+    #' @param sftp_url Character. The full URL to the remote resource.
+    #'   If \code{NULL}, returns \code{FALSE}.
+    #'
+    #' @return Logical. \code{TRUE} if the resource exists and is accessible;
+    #'   \code{FALSE} otherwise.
+    #'
+    #' @keyword internal
+    #' @noRd
+    .exists =
+      function(sftp_url = NULL) {
+        if (is.null(sftp_url)) stop("`sftp_url` cannot be NULL")
+        # STAT request with `nobody` = T
+        h <- private$.base_handle(nobody = TRUE, connecttimeout = 5)
+        check <-
+          try(
+            curl::curl_fetch_memory(url = sftp_url, handle = h),
+            silent = TRUE
+          )
+        return(!inherits(check, "try-error"))
       }
   ),
   active = list(
