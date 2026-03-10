@@ -152,6 +152,8 @@ sftp_connect <- R6::R6Class(
     #' @param local_file Path to file, data.frame, or connection.
     #' @param reuse Logical; try to keep connection alive.
     #' @param ... Additional options for \code{curl::handle_setopt()}.
+    #' @keyword internal
+    #' @noRd
     .upload_handle =
       function(local_file, reuse = TRUE, .verbose = self$.verbose, ...) {
         # check if `local_file` exists
@@ -281,7 +283,6 @@ sftp_connect <- R6::R6Class(
     #' An internal factory method that generates an authenticated curl handle
     #' configured with the appropriate protocol-specific deletion command
     #' (e.g., \code{rm}, \code{rmdir}, \code{DELE}, or \code{RMD}).
-    #'
     #' @param protocol Character. The protocol to use (defaulting to the
     #'   connection's \code{self$protocol}). Supported: "sftp", "ftp".
     #' @param remote_url Character. The remote path to the file or directory
@@ -290,6 +291,8 @@ sftp_connect <- R6::R6Class(
     #'   commands (\code{rmdir} or \code{RMD}). Defaults to \code{FALSE}.
     #' @param ... Additional arguments passed to \code{private$.base_handle()}
     #'   and \code{curl::handle_setopt()}.
+    #' @keyword internal
+    #' @noRd
     .delete_handle =
       function(protocol = self$protocol, remote_url, is_dir = FALSE, ...) {
         remove_method <-
