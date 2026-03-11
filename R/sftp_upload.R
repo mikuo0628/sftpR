@@ -46,8 +46,8 @@ sftp_upload <- function(
     .verbose = TRUE) {
   # 1) Sanitize and check `remote_file`: should be relative
   if (is.null(remote_file)) remote_file <- basename(match.call()$local_file)
-  remote_file <- 
-    .validate_sftp_url(sftp_conn = sftp_conn, remote_file,  .verbose = .verbose)
+  remote_file <-
+    .validate_sftp_url(sftp_conn = sftp_conn, remote_file, .verbose = .verbose)
 
   # 2) create upload handle
   # - this step creates curl handle specifically for upload
@@ -78,7 +78,10 @@ sftp_upload <- function(
   try_upload <- try(curl::curl_fetch_memory(remote_file, handle = upload_h$h))
 
   if (inherits(try_upload, "try-error")) {
-    stop("!! Upload failed !!: ", conditionMessage(attr(try_upload, "condition")))
+    stop(
+      "!! Upload failed !!: ",
+      conditionMessage(attr(try_upload, "condition"))
+    )
   } else {
     .verbose_msg(.verbose = .verbose, "Upload successful!", message)
   }

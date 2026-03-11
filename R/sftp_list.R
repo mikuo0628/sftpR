@@ -29,31 +29,40 @@
 #' @examples
 sftp_list <- function(
     sftp_conn = NULL,
-    .recursive = FALSE) {
-  # get response
+    sftp_url = NULL,
+    .verbose = TRUE,
+    .recursive = FALSE,
+    .check = .recursive) {
+  sftp_url <-
+    if (is.null(sftp_url)) {
+      sftp_conn$clean_url$full_url
+    } else {
+      # Sanitize `sftp_url`
+      sftp_conn$.__enclos_env__$private$.fix_url_type(
+        .validate_sftp_url(sftp_conn, sftp_url, .verbose = .verbose)
+      )
+    }
+
   resp <-
     try(
-      curl::curl_fetch_memory(sftp_conn$clean_url$full_url, sftp_conn$h)
+      curl::curl_fetch_memory(sftp_url, sftp_conn$h)
     )
 
   if (resp$status_code != 0 || inherits(resp, "try-error")) {
     stop("SFTP connection issue")
   }
 
-  df_objs <- sftp_parse(resp)
+  df_objs <- .sftp_parse(resp, h = sftp_conn$h)
 
   # recursively crawl subdirectories
   if (isTRUE(.recursive)) {
     sftp_crawl <- function(df_objs, visited = character()) {
-      if (all(df_objs$type == "file")) {
-        return(df_objs)
-      }
+      if (all(df_objs$type == "file")) return(df_objs)
 
       df_output <- data.frame()
 
-      for (df_row in split(df_objs, 1:nrow(df_objs))) {
+      for (df_row in split(df_objs, seq_len(nrow(df_objs)))) {
         df_output <- rbind(df_output, df_row)
-
         if (df_row$type == "dir") {
           # build URL to be checked
           target_url <-
@@ -66,12 +75,7 @@ sftp_list <- function(
 
           new_visited <- c(visited, target_url)
 
-          df_objs_sub <-
-            sftp_parse(
-              sftp_url = df_row$url,
-              subdir   = df_row$name,
-              h        = sftp_conn$h
-            )
+          df_objs_sub <- .sftp_parse(sftp_url = target_url, h = sftp_conn$h)
 
           df_output <-
             rbind(
@@ -114,17 +118,13 @@ sftp_list <- function(
 #' \code{"."} and \code{".."}. It determines object types based on the first
 #' character of the permission string (e.g., 'd' for directory).
 #' @keywords internal
-sftp_parse <- function(
-    resp = NULL,
-    sftp_url = NULL,
-    subdir = NULL,
-    h = NULL) {
+#' @noRd
+.sftp_parse <- function(resp = NULL, sftp_url = NULL, h = NULL) {
   if (is.null(resp)) {
     if (is.null(sftp_url)) stop("Must supply either `resp` or `sftp_url`")
-    url <- .join_url_path(sftp_url, subdir, is_dir = !is.null(subdir))
-    resp <- do.call(curl::curl_fetch_memory, list(url = url, h = h))
+    resp <- do.call(curl::curl_fetch_memory, list(url = sftp_url, h = h))
   } else {
-    url <- resp$url
+    sftp_url <- resp$url
   }
 
   # parse `ls -l` style output into df
@@ -154,14 +154,14 @@ sftp_parse <- function(
         "d" = "dir",
         "-" = "file"
       ),
-      simplify = T
+      simplify = TRUE
     )
 
   if (nrow(df_objs) == 0) {
     return(NULL)
   }
 
-  df_objs$url <- url
+  df_objs$url <- sftp_url
 
   return(df_objs)
 }
