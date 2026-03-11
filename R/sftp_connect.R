@@ -283,18 +283,32 @@ sftp_connect <- R6::R6Class(
     #' An internal factory method that generates an authenticated curl handle
     #' configured with the appropriate protocol-specific deletion command
     #' (e.g., \code{rm}, \code{rmdir}, \code{DELE}, or \code{RMD}).
+    #' @param remote_url
+    #'   Character. Validated (ie. with \code{.validate_sftp_url()})
+    #'   remote path to the file or directory to be deleted.
+    #'   Whether this is a directory or file will be determined and the
+    #'   approrpiate DELETE keyword will be determined.
     #' @param protocol Character. The protocol to use (defaulting to the
     #'   connection's \code{self$protocol}). Supported: "sftp", "ftp".
-    #' @param remote_url Character. The remote path to the file or directory
-    #'   to be deleted.
-    #' @param is_dir Logical. If \code{TRUE}, uses directory-specific deletion
-    #'   commands (\code{rmdir} or \code{RMD}). Defaults to \code{FALSE}.
+    #' @param .verbose Logical. Toggle verbose output.
     #' @param ... Additional arguments passed to \code{private$.base_handle()}
     #'   and \code{curl::handle_setopt()}.
     #' @keyword internal
     #' @noRd
     .delete_handle =
-      function(protocol = self$protocol, remote_url, is_dir = FALSE, ...) {
+      function(
+        remote_url,
+        protocol = self$protocol,
+        .verbose = self$.verbose,
+        ...
+      ) {
+        # determine dir or file, and remove "base" URL
+        remote_url <- private$.fix_url_type(remote_url)
+        remote_url <- gsub(self$clean_url$full_url, "", remote_url)
+
+        # check is_dir
+        is_dir <- grepl("/$", remote_url)
+
         remove_method <-
           switch(
             paste0(tolower(protocol), "_", is_dir),
@@ -304,6 +318,7 @@ sftp_connect <- R6::R6Class(
             "ftp_FALSE"  = "DELE",
             stop("Unsupported protocol or type")
           )
+
         h <-
           private$.base_handle(
             quote = paste(remove_method, remote_url),
