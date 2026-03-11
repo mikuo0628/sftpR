@@ -51,7 +51,7 @@ sftp_connect <- R6::R6Class(
     #' @param user Character. SFTP account name.
     #' @param password Character. SFTP password.
     #' @param timeout Integer. Connection timeout.
-    #' @param .verbose Logical. Toggle verbose output.
+    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
     #' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
     #' @return A new `SFTPConn` object.
     initialize =
@@ -151,6 +151,7 @@ sftp_connect <- R6::R6Class(
     #' Adapted from \code{curl::curl_upload()}.
     #' @param local_file Path to file, data.frame, or connection.
     #' @param reuse Logical; try to keep connection alive.
+    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
     #' @param ... Additional options for \code{curl::handle_setopt()}.
     #' @keyword internal
     #' @noRd
@@ -290,7 +291,7 @@ sftp_connect <- R6::R6Class(
     #'   approrpiate DELETE keyword will be determined.
     #' @param protocol Character. The protocol to use (defaulting to the
     #'   connection's \code{self$protocol}). Supported: "sftp", "ftp".
-    #' @param .verbose Logical. Toggle verbose output.
+    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
     #' @param ... Additional arguments passed to \code{private$.base_handle()}
     #'   and \code{curl::handle_setopt()}.
     #' @keyword internal

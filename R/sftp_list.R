@@ -7,10 +7,18 @@
 #' infinite recursion and stack overflow errors.
 #'
 #' @param sftp_conn A \code{SFTPConn} object containing connection details and
-#' authentication. Created by \code{\link{sftp_connect}}.
+#'   authentication. Created by \code{\link{sftp_connect}}.
+#'
+#' @param sftp_url A SFTP URL of which the contents will be listed. If `NULL`,
+#'   the base URL in \code{SFTPConn} will be used: contents of the SFTP home
+#'   folder will be listed.
 #'
 #' @param .recursive Logical. If \code{TRUE}, recursively enters subdirectories
 #'   to return a flattened tree of all remote objects. Defaults to \code{FALSE}.
+#'
+#' @param .check Logical. If \code{TRUE}, determines \code{sftp_url} is a
+#'   directory or a file, and modify the URL appropriately if needed.
+#'   Defaults to value of \code{.recursive}.
 #'
 #' @return A \code{data.frame} containing remote file/directory metadata:
 #' \itemize{
@@ -104,10 +112,13 @@ sftp_list <- function(
 #' A utility function that converts the raw binary content of an SFTP directory
 #' listing (returned by \code{curl}) into a structured R \code{data.frame}.
 #'
-#' @param resp A response list from \code{curl::curl_fetch_memory}. If \code{NULL},
-#'   the function will attempt to fetch data using \code{sftp_url} and \code{h}.
-#' @param sftp_url Character. The SFTP URL to fetch if \code{resp} is \code{NULL}.
-#' @param subdir Character. An optional subdirectory to append to \code{sftp_url}.
+#' @param resp A response list from \code{curl::curl_fetch_memory}.
+#'   If \code{NULL}, the function will attempt to fetch data using
+#'   \code{sftp_url} and \code{h}.
+#'
+#' @param sftp_url Character. The SFTP URL to fetch if \code{resp} is
+#'   \code{NULL}. This function will assume URL is valid (ie. dir or file).
+#'
 #' @param h A \code{curl} handle. Required only if \code{resp} is \code{NULL}.
 #'
 #' @return A \code{data.frame} with parsed Unix-style directory metadata,

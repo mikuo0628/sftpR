@@ -8,7 +8,7 @@
 #' @param sftp_conn An \code{SFTPConn} R6 object.
 #' @param remote_url Character. The full URL or relative path of the
 #'   resource to delete.
-#' @param .verbose Logical. Prints helpful verbose messages.
+#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
 #'
 #' @return Logical `TRUE` invisibly, if deletion is successful.
 #'
