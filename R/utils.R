@@ -18,7 +18,7 @@
 #'
 #' @param url A character string containing the SFTP URL.
 #'
-#' @param .verbose logical. Defaults to `FALSE`. Prints verbose messages.
+#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
 #'
 #' @return A named list containing:
 #'   \item{protocol}{The scheme (e.g., "sftp").}
@@ -115,7 +115,7 @@
 #'   sanitize `path` of minor formatting issues, such as extra slashes, and
 #'   ensure a trailing slash if not NULL.
 #'
-#' @param .verbose logical. Defaults to `FALSE`. Prints verbose messages.
+#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
 #'
 #' @return A list with components: full_url, protocol, hostname, port, path.
 #'
@@ -224,7 +224,7 @@
 #' @param user_url
 #'   Character string. The destination SFTP URL or path provided by the user.
 #'
-#' @param .verbose logical. Defaults to `FALSE`. Prints verbose messages.
+#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
 #'
 #' @details
 #' The function performs the following steps:
