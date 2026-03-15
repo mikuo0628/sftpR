@@ -1,3 +1,45 @@
+#' Create an \code{SFTPConn} R6 object that contains important connection
+#' information safely.
+#' 
+#' @inherit SFTPConnGenerator description
+#' @inheritParams SFTPConnGenerator
+#' @inherit SFTPConnGenerator detail
+#' @inherit SFTPConnGenerator return
+#' @examples
+#' \dontrun{
+#' # Create a new SFTP connection
+#' sftp_conn <- sftp_connect(
+#'   hostname = "127.0.0.1",
+#'   port     = 2222,
+#'   user     = "tester",
+#'   password = "password123",
+#' }
+#'
+#' @export
+sftp_connect <- function(
+  protocol = "sftp",
+  hostname = "localhost",
+  path     = NULL,
+  port     = 22L,
+  user     = NA_character_,
+  password = NA_character_,
+  timeout  = 30L,
+  ...,
+  .verbose = TRUE
+) {
+  SFTPConnGenerator(
+    protocol = protocol,
+    hostname = hostname,
+    path     = path,
+    port     = port,
+    user     = user,
+    password = password,
+    timeout  = timeout,
+    .verbose = .verbose,
+    ...
+  )
+}
+
 #' SFTP Connection Class
 #'
 #' @description
@@ -13,18 +55,7 @@
 #' An `SFTPConn` object with methods for connection management and
 #' file uploads.
 #'
-#' @examples
-#' \dontrun{
-#' # Create a new SFTP connection
-#' sftp_conn <- sftp_connect$new(
-#'   hostname = "127.0.0.1",
-#'   port     = 2222,
-#'   user     = "tester",
-#'   password = "password123",
-#' }
-#'
-#' @export
-sftp_connect <- R6::R6Class(
+SFTPConnGenerator <- R6::R6Class(
   "SFTPConn",
   public = list(
     #' @field protocol The connection protocol (defaults to "sftp://").
