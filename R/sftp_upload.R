@@ -75,12 +75,17 @@ sftp_upload <- function(
     message
   )
 
-  try_upload <- try(curl::curl_fetch_memory(remote_file, handle = upload_h$h))
+  try_upload <-
+    try(
+      curl::curl_fetch_memory(remote_file, handle = upload_h$h),
+      silent = TRUE
+    )
 
   if (inherits(try_upload, "try-error")) {
     stop(
-      "!! Upload failed !!: ",
-      conditionMessage(attr(try_upload, "condition"))
+      "\nUpload failed: ",
+      conditionMessage(attr(try_upload, "condition")),
+      "\nTry setting `.create_dir = TRUE`."
     )
   } else {
     .verbose_msg(.verbose = .verbose, "Upload successful!", message)
