@@ -316,8 +316,8 @@ SFTPConnGenerator <- R6::R6Class(
         remote_url_from = NULL,
         remote_url_to   = NULL,
         purpose = c("rm", "mkdir", "rename"),
-        .recursive = FALSE,
         .verbose = self$.verbose,
+        .return_error = TRUE,
         ...
       ) {
         # determine dir or file
@@ -349,13 +349,18 @@ SFTPConnGenerator <- R6::R6Class(
               grepl("/$", remote_url$from),
               sep = "_"
             ),
-            "rm_sftp_TRUE"     = "rmdir",
-            "rm_sftp_FALSE"    = "rm",
-            "rm_ftp_TRUE"      = "RMD",
-            "rm_ftp_FALSE"     = "DELE",
-            "mkdir_sftp_TRUE"  = "mkdir",
-            "mkdir_ftp_TRUE"   = "MKD",
-            "rename_sftp_TRUE" = "rename",
+            "rm_sftp_TRUE"      = "rmdir",
+            "rm_sftp_FALSE"     = "rm",
+            "rm_ftp_TRUE"       = "RMD",
+            "rm_ftp_FALSE"      = "DELE",
+            "mkdir_sftp_TRUE"   = "*mkdir",
+            "mkdir_sftp_FALSE"  = "*mkdir",
+            "mkdir_ftp_TRUE"    = "MKD",
+            "mkdir_ftp_FALSE"   = "MKD",
+            "rename_sftp_TRUE"  = "rename",
+            "rename_sftp_FALSE" = "rename",
+            "rename_ftp_TRUE"   = "RNFR",
+            "rename_ftp_FALSE"  = "RNFR",
             stop(
               sprintf(
                 "Unsupported protocol or type for %s.",
@@ -368,6 +373,8 @@ SFTPConnGenerator <- R6::R6Class(
               )
             )
           )
+
+        if (isFALSE(.return_error)) command <- paste0("*", command)
 
         # remote risky trailing slash
         relative_url <-
