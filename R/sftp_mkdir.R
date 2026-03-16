@@ -1,16 +1,49 @@
-sftp_mkdir <- function(dir_name, protocol, server, base_folder = "upload") {
-  # Build the URL and the command
-  target_url <- .build_sftp_url(protocol, server, base_folder)
-  mkdir_cmd <- paste0("mkdir ", base_folder, "/", gsub("^/", "", dir_name))
-  
-  h <- get_sftp_handle()
-  curl::handle_setopt(h, quote = mkdir_cmd)
-  
-  # A fetch is required to trigger the 'quote' command
-  tryCatch({
-    curl::curl_fetch_memory(target_url, handle = h)
-    message("Successfully created: ", dir_name)
-  }, error = function(e) {
-    stop("Failed to create directory. Ensure it doesn't already exist or check permissions.")
-  })
+#' @export
+sftp_mkdir <- function(
+    sftp_conn,
+    remote_url = NULL,
+    .recursive = TRUE,
+    .verbose   = TRUE) {
+  # checks remote_url to ensure parts and spelling are consistent with sftp_conn
+  remote_url <- .validate_sftp_url(sftp_conn, remote_url, .verbose)
+  remote_url <-
+    ifelse(!grepl("/$", remote_url), paste0(remote_url, "/"), remote_url)
+
+  h <-
+    sftp_conn$.quote_handle(
+      remote_url_from = remote_url,
+      purpose = "mkdir",
+      .recursive = .recursive,
+      .verbose = .verbose
+    )
+
+  resp <-
+    try(
+      curl::curl_fetch_memory(sftp_conn$clean_url$full_url, handle = h),
+      silent = TRUE
+    )
+
+  if (inherits(resp, "try-error")) {
+    err_msg <- conditionMessage(attr(resp, "condition"))
+    stop(
+      "\nUnable to create directory: ", remote_url, "\n",
+      ifelse(
+        grepl("No such file", err_msg),
+        paste0(
+          "Missing parent directory:\n",
+          "Try setting `.recursive = TRUE`.\n"
+        ),
+        err_msg
+      ),
+      call. = FALSE
+    )
+  }
+
+  .verbose_msg(
+    .verbose = .verbose,
+    sprintf("Successfully created directory: %s", remote_url),
+    message
+  )
+
+  return(invisible(TRUE))
 }
