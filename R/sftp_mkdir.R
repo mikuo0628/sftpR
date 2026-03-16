@@ -1,3 +1,36 @@
+#' Create Remote Directories via SFTP
+#'
+#' This function creates directories on a remote server using the SFTP protocol.
+#' It supports recursive directory creation, effectively behaving like
+#' \code{mkdir -p} on a Unix-like system.
+#'
+#' @param sftp_conn An \code{SFTPConn} R6 object, created by
+#'   \code{\link{sftp_connect}}.
+#' @param remote_url Character. The relative or absolute path of the directory
+#'   to create.
+#' @param .recursive Logical. If \code{TRUE}, creates missing parent
+#'   directories. Defaults to \code{TRUE}.
+#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+#' @param .return_error Logical. If \code{FALSE}, the function uses the \code{*}
+#'   prefix in the curl quote command to ignore errors (e.g., if the directory
+#'   already exists). Defaults to \code{!.recursive}.
+#'
+#' @return \code{invisible(TRUE)} on success.
+#'
+#' @details
+#' When \code{.recursive = TRUE}, the function splits the path into segments and
+#' attempts to create each one sequentially. It uses the \code{*} prefix for
+#' internal calls to ensure that existing directories do not trigger errors.
+#'
+#' @examples
+#' \dontrun{
+#' # Create a nested directory structure
+#' sftp_mkdir(sftp_conn, "project/data/results/2026", .recursive = TRUE)
+#'
+#' # Create a single directory and fail if parents are missing
+#' sftp_mkdir(sftp_conn, "simple_dir", .recursive = FALSE)
+#' }
+#'
 #' @export
 sftp_mkdir <- function(
     sftp_conn,
@@ -10,7 +43,7 @@ sftp_mkdir <- function(
 
   if (isTRUE(.recursive)) {
     path_string <- gsub("/$", "", .parse_sftp_url(remote_url)$path)
-    segments    <- unlist(strsplit(path_string, "/"))
+    segments <- unlist(strsplit(path_string, "/"))
     current_url <- gsub("/$", "", sftp_conn$clean_url$full_url)
 
     for (segment in segments) {
