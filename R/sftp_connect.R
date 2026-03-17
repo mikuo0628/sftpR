@@ -27,7 +27,7 @@ sftp_connect <- function(
   ...,
   .verbose = TRUE
 ) {
-  SFTPConnGenerator(
+  sftp_conn_generator$new(
     protocol = protocol,
     hostname = hostname,
     path     = path,
@@ -55,7 +55,7 @@ sftp_connect <- function(
 #' An `SFTPConn` object with methods for connection management and
 #' file uploads.
 #'
-SFTPConnGenerator <- R6::R6Class(
+sftp_conn_generator <- R6::R6Class(
   "SFTPConn",
   public = list(
     #' @field protocol The connection protocol (defaults to "sftp://").

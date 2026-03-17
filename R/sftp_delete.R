@@ -30,7 +30,7 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' conn <- SFTPConn$new(hostname = "sftp.example.com", user = "jdoe")
+#' conn <- sftp_connect(hostname = "sftp.example.com", user = "jdoe")
 #' sftp_delete(conn, "data/old_file.csv")
 #' }
 sftp_delete <- function(

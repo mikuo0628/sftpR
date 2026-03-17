@@ -35,7 +35,7 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' conn <- sftp_connect$new(hostname = "sftp.example.com", user = "user")
+#' conn <- sftp_connect(hostname = "sftp.example.com", user = "user")
 #' sftp_upload(conn, my_df, "uploads/data.csv")
 #' }
 sftp_upload <- function(
