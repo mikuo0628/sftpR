@@ -1,6 +1,6 @@
 #' Download Files from SFTP Server
 #'
-#' Downloads a file from a remote SFTP server either to a local disk location
+#' Downloads a file from a remote SFTP server to a local disk location
 #' or directly into R's memory as a raw vector.
 #'
 #' @param sftp_conn An \code{SFTPConn} R6 object, created by
@@ -9,42 +9,48 @@
 #' @param local_file Character or \code{NULL}.
 #'   \itemize{
 #'     \item If \code{character}: The local path where the file should be saved.
-#'       If only a directory is provided, the remote filename is used.
-#'     \item If \code{NA} (default) or an empty string: The file is saved to the
-#'       current working directory using its remote filename.
+#'     \item If \code{NA} (default) or an empty string: The file is saved to
+#'       the current working directory using its remote filename.
 #'     \item If \code{NULL}: The file is downloaded to memory and
 #'       returned as a \code{raw} vector.
 #'   }
 #' @param .create_dir Logical. If \code{TRUE}, creates the local destination
 #'   directory if it does not exist. Defaults to \code{FALSE}.
-#' @param .verbose Logical. If \code{TRUE}, prints progress and status messages.
+#' @param .overwrite Logical. If \code{FALSE} (default), the function willthrow
+#'   an error if a local file already exists at the destination.
+#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
 #' @param ... Additional arguments passed to \code{curl::curl_download}.
 #'
 #' @return If \code{local_file} is \code{NULL}, a \code{raw} vector of the file
-#'   contents. Otherwise, the path to the saved file (invisibly).
+#'   contents. Otherwise, the resolved local path to the saved file (invisibly).
 #'
-#' @details
-#' The function uses \code{curl::curl_fetch_memory} for memory downloads and
-#' \code{curl::curl_download} for disk downloads to ensure efficient stream
-#' handling. If \code{.create_dir = FALSE} and the local directory is missing,
-#' the function will stop with an error.
+#' @section Local Path Resolution Caveats:
+#'   To provide a "smart" user experience, the function guesses
+#'   if \code{local_file} is intended to be a directory or a specific filename:
+
+#' \itemize{
+#'   \item \strong{Directory Detection:} If the path exists as a directory, ends
+#'     in a trailing slash, or has no file extension, it is treated as a folder.
+#'     The remote filename will be appended to this path.
+#'   \item \strong{File Detection:} If the path does not exist and contains a
+#'     file extension (e.g., ".csv"), it is treated as the final destination
+#'     filename.
+#'   \item \strong{Ambiguity:} In ambiguous cases (e.g., a non-existent path
+#'     without a slash or extension), the function defaults to treating the path
+#'     as a directory.
+#' }
 #'
 #' @examples
 #' \dontrun{
-#' # Download to current working directory
+#' # Download and use the remote filename
 #' sftp_download(sftp_conn, "data/raw_logs.zip")
 #'
-#' # Download to memory and convert a text file
-#' raw_bytes <- sftp_download(sftp_conn, "config.txt", local_file = NULL)
-#' cat(rawToChar(raw_bytes))
+#' # Download to a specific local name
+#' sftp_download(sftp_conn, "remote_file.csv", "local_name.csv")
 #'
-#' # Download to a specific path, creating folders if needed
-#' sftp_download(
-#'   sftp_conn,
-#'   "report.pdf",
-#'   "exports/2026/final_report.pdf",
-#'   .create_dir = TRUE
-#' )
+#' # Download to memory for immediate processing
+#' raw_bytes <- sftp_download(sftp_conn, "data.json", local_file = NULL)
+#' data <- jsonlite::fromJSON(rawToChar(raw_bytes))
 #' }
 #'
 #' @export
