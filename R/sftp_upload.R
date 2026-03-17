@@ -83,7 +83,7 @@ sftp_upload <- function(
 
   if (inherits(try_upload, "try-error")) {
     stop(
-      "\nUnable to upload: ",
+      "\nCannot upload: ",
       conditionMessage(attr(try_upload, "condition")),
       "\nTry setting `.create_dir = TRUE`."
     )

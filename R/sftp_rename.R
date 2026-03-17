@@ -93,7 +93,7 @@ sftp_rename <- function(
   if (inherits(resp, "try-error")) {
     err_msg <- conditionMessage(attr(resp, "condition"))
     stop(
-      "\nUnable to rename:\n",
+      "\nCannot rename:\n",
       ifelse(
         grepl("No such file", err_msg) && !.recursive,
         paste0(

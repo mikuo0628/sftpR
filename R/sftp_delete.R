@@ -56,7 +56,7 @@ sftp_delete <- function(
 
   if (inherits(resp, "try-error")) {
     stop(
-      "\nUnable to delete: ", remote_url, "\n",
+      "\nCannot delete: ", remote_url, "\n",
       " If this is a directory, is it empty?\n",
       " If this is a file, are you sure it still exists?\n",
       conditionMessage(attr(resp, "condition")),

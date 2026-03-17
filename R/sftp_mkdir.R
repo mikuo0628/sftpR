@@ -78,7 +78,7 @@ sftp_mkdir <- function(
     if (inherits(resp, "try-error")) {
       err_msg <- conditionMessage(attr(resp, "condition"))
       stop(
-        "\nUnable to create directory: ", remote_url, "\n",
+        "\nCannot create directory: ", remote_url, "\n",
         ifelse(
           grepl("No such file", err_msg) && !.recursive,
           paste0(

@@ -127,7 +127,7 @@ sftp_conn_generator <- R6::R6Class(
         if (isFALSE(self$connection_ok())) {
           stop(
             paste0(
-              "Unable to connect to SFTP server at ",
+              "\nCannot connect to SFTP server at ",
               self$clean_url$full_url,
               ". Please check your connection settings and credentials."
             )
