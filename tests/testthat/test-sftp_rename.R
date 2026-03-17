@@ -56,7 +56,7 @@ test_that(
       .recursive      = FALSE
     ) |>
       expect_message("rename \"upload/mtcars_2.csv\"", ignore.case = TRUE) |>
-      expect_error("unable to rename", ignore.case = TRUE)
+      expect_error("Cannot rename", ignore.case = TRUE)
 
     sftp_rename(
       sftp_conn,

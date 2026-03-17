@@ -47,12 +47,12 @@ test_that(
       .recursive = TRUE,
       .verbose = TRUE
     ) |>
-      expect_message("successfully created", ignore.case = TRUE) |>
       expect_message("*mkdir upload", ignore.case = TRUE) |>
       expect_message("successfully created", ignore.case = TRUE) |>
       expect_message("*mkdir upload/subdir2", ignore.case = TRUE) |>
       expect_message("successfully created", ignore.case = TRUE) |>
-      expect_message("*mkdir upload/subdir2/test", ignore.case = TRUE)
+      expect_message("*mkdir upload/subdir2/test", ignore.case = TRUE) |.
+      expect_message("successfully created", ignore.case = TRUE)
 
     sftp_mkdir(
       sftp_conn,
