@@ -36,16 +36,18 @@
 sftp_delete <- function(
     sftp_conn,
     remote_url = NULL,
-    .verbose = TRUE) {
-  # checks remote_url to ensure parts and spellings are good compare to
-  # source of truth
-  remote_url <-
-    .validate_sftp_url(sftp_conn = sftp_conn, remote_url, .verbose = .verbose)
+    .verbose   = TRUE) {
+  # checks remote_url to ensure parts and spelling are consistent with sftp_conn
+  remote_url <- .validate_sftp_url(sftp_conn, remote_url, .verbose)
 
   # create delete handle that will automatically determine which delete
   # function to use, and removes "base" url from remote_url
-  h <- sftp_conn$.delete_handle(remote_url = remote_url, .verbose = .verbose)
-
+  h <-
+    sftp_conn$.quote_handle(
+      remote_url_from = remote_url,
+      purpose         = "rm",
+      .verbose        = .verbose
+    )
   resp <-
     try(
       curl::curl_fetch_memory(sftp_conn$clean_url$full_url, handle = h),
@@ -55,7 +57,8 @@ sftp_delete <- function(
   if (inherits(resp, "try-error")) {
     stop(
       "\nUnable to delete: ", remote_url, "\n",
-      "If this is a directory, is it empty?\n",
+      " If this is a directory, is it empty?\n",
+      " If this is a file, are you sure it still exists?\n",
       conditionMessage(attr(resp, "condition")),
       call. = FALSE
     )
