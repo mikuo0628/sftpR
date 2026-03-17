@@ -53,9 +53,9 @@ sftp_download <- function(
     remote_file,
     local_file = NA_character_,
     .create_dir = FALSE,
+    .overwrite = FALSE,
     .verbose = TRUE,
     ...) {
-  browser()
   # 1) Sanitize remote url
   remote_file <-
     .validate_sftp_url(sftp_conn, sftp_conn$.fix_url_type(remote_file))
@@ -77,8 +77,8 @@ sftp_download <- function(
   }
 
   ## To file
+  filename <- basename(remote_file)
   if (is.na(local_file) || !nzchar(local_file)) {
-    filename <- basename(remote_file)
     dir_local_file <- getwd()
     .verbose_msg(
       .verbose = .verbose,
@@ -92,30 +92,39 @@ sftp_download <- function(
       message
     )
   } else {
-    # handle whether
-    ## local_file exists, is file
-    ## local_file exists, is dir
-    ## local_file does not exist, would be file
-    ## local_file does not exist, would be dir
-    utils::file_test(dirname(local_file))
+    is_intended_dir <-
+      dir.exists(local_file) ||
+      grepl("/$", local_file) ||
+      !nzchar(tools::file_ext(local_file))
 
-
-    filename <- basename(local_file)
-    dir_local_file <- dirname(local_file)
+    if (isTRUE(is_intended_dir)) {
+      dir_local_file <- local_file
+    } else {
+      filename       <- basename(local_file)
+      dir_local_file <- dirname(local_file)
+    }
   }
+
+  dest_file <- file.path(dir_local_file, filename)
 
   if (!dir.exists(dir_local_file)) {
     if (isTRUE(.create_dir)) {
       dir.create(dir_local_file, recursive = TRUE)
     } else {
       stop(
-        "\nCannot save file: directories do not exist.",
-        "\nTry setting `.create_dir = TRUE`."
+        sprintf("\nCannot save file here: [%s]", dest_file),
+        "\nDirectories may not exist.",
+        "\nTry revising `local_file` or setting `.create_dir = TRUE`."
       )
     }
   }
 
-  dest_file <- file.path(dir_local_file, filename)
+  if (isFALSE(.overwrite) && file.exists(dest_file)) {
+    stop(
+      "\nFile of the same name already exists.",
+      "\nTry setting `.overwrite = TRUE`."
+    )
+  }
   .verbose_msg(
     .verbose = .verbose,
     sprintf(
