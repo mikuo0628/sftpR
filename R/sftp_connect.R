@@ -353,8 +353,8 @@ sftp_conn_generator <- R6::R6Class(
             "rm_sftp_FALSE"     = "rm",
             "rm_ftp_TRUE"       = "RMD",
             "rm_ftp_FALSE"      = "DELE",
-            "mkdir_sftp_TRUE"   = "*mkdir",
-            "mkdir_sftp_FALSE"  = "*mkdir",
+            "mkdir_sftp_TRUE"   = "mkdir",
+            "mkdir_sftp_FALSE"  = "mkdir",
             "mkdir_ftp_TRUE"    = "MKD",
             "mkdir_ftp_FALSE"   = "MKD",
             "rename_sftp_TRUE"  = "rename",
@@ -395,26 +395,8 @@ sftp_conn_generator <- R6::R6Class(
         quote <- paste(command, relative_url$from)
         h <-
           if (purpose == "rename") {
-            # check remote_url$to exists
-            if (is.null(relative_url$to)) {
-              stop(
-                "Need to supply what you want to rename to ",
-                "(`remote_url_to`).",
-                call. = FALSE
-              )
-            }
-
-            if (!isTRUE(.exists(remote_url$to))) {
-              stop(
-                "Destination folder does not exist: ",
-                remote_url$to, "\n",
-                "Please run `sftp_mkdir` to create it.",
-                call. = FALSE
-              )
-            }
-
             quote <-
-              if (protocol == "sftp") {
+              if (self$protocol == "sftp") {
                 paste(
                   "rename",
                   paste(
@@ -434,10 +416,8 @@ sftp_conn_generator <- R6::R6Class(
               ...
             )
           } else if (purpose == "mkdir") {
-            browser()
             private$.base_handle(
               quote = quote,
-              ftp_create_missing_dirs = ifelse(isTRUE(.recursive), 1L, 0L),
               ...
             )
           } else if (purpose == "rm") {
@@ -492,7 +472,7 @@ sftp_conn_generator <- R6::R6Class(
             curl::curl_fetch_memory(url = sftp_url, handle = h),
             silent = TRUE
           )
-        return(!inherits(check, "try-error"))
+        return(!inherits(check, "try-error") && !is.na(check$modified))
       },
 
     #' URL "fixing" via range probing
@@ -528,6 +508,15 @@ sftp_conn_generator <- R6::R6Class(
       function(remote_url) {
         # requesting the first byte of data (CURLOPT_RANGE 0-0)
         ## only works if URL is a file, and will reject request if URL is dir
+        if (!isTRUE(self$.exists(remote_url))) {
+          .verbose_msg(
+            .verbose = self$.verbose,
+            "URL does not exist. No change will be made.",
+            warning
+          )
+          return(remote_url)
+        }
+
         h <- private$.base_handle(range = "0-0", connecttimeout = 5)
 
         accessible <-
