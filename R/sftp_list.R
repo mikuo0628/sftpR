@@ -45,8 +45,12 @@ sftp_list <- function(
     if (is.null(sftp_url)) {
       sftp_conn$clean_url$full_url
     } else {
-      # Sanitize `sftp_url`
-      sftp_conn$.__enclos_env__$private$.fix_url_type(
+      # Sanitize `sftp_url`: checks with source of truth, check type and
+      # append trailing slash if needed.
+      # Trailing slash is MANDATORY for directories: without it, `curl` thinks
+      # the directory is a file and tries to "download" its binary content
+      # (which fails). The slash is the signal to "enter" the folder.
+      sftp_conn$.fix_url_type(
         .validate_sftp_url(sftp_conn, sftp_url, .verbose = .verbose)
       )
     }
