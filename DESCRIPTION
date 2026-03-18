@@ -1,21 +1,32 @@
 Package: sftpR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Robust 'SFTP' Interface Using 'curl'
 Version: 0.1.0
 Authors@R: c(
-    person(
-      "Jane", "Doe",
-      email = "jane@example.com",
-      role = c("aut", "cre")
-    )
+    person("Michael", "Kuo", , "michael.kuo@bccdc.ca", role = c("aut", "cre"))
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Description: Provides a high-level, object-oriented interface for Secure 
+    File Transfer Protocol ('SFTP') operations built upon the 'curl' 
+    package. The package implements an 'R6' class to manage persistent 
+    connections and provides 'tidyverse'-style functions for common file 
+    system tasks. Key features include recursive directory creation with 
+    idempotency support, "smart" local path resolution that distinguishes 
+    between files and directories, and the ability to download remote 
+    resources directly into memory as raw vectors for seamless 
+    integration into data processing pipelines. It is designed to handle 
+    common 'SFTP' edge cases gracefully, providing informative error 
+    messages and robust path sanitization to ensure compatibility across 
+    different server configurations.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Config/testthat/edition: 3
+SystemRequirements: libcurl: libcurl (with libssh2 support)
 Imports: 
     curl,
     magrittr,
     R6
 RoxygenNote: 7.3.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
