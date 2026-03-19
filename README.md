@@ -4,9 +4,24 @@
 # sftpR
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
-The goal of sftpR is to …
+Robust SFTP tooling for R built on top of the
+[`curl`](https://cran.r-project.org/web/packages/curl/index.html)
+package.
+
+This package is inspired by [`sftp`](https://github.com/stenevang/sftp),
+with updates to a more robust handling of inputs and paths, secure
+management of user credentials, and modern backend.
+
+It provides an R6-based connection object that maintains user credential
+safely and a reusable `curl` handle, with public methods for safe
+printing and connection checking, and creating private purpose-specific
+handles (upload, rename, mkdir, etc).
+
+It also comes with the typical core CRUD functions to perform common
+SFTP operations, while reusing a single `curl` handle when appropriate.
 
 ## Installation
 
@@ -18,43 +33,43 @@ You can install the development version of sftpR from
 devtools::install_github("mikuo0628/sftpR")
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
+## Quick Start
 
 ``` r
-library(sftpR)
-## basic example code
+# Establish connection (see ?sftp_connect for detail)
+sftp_conn <- 
+  sftp_connect(
+    hostname = "127.0.0.1",
+    port     = "2222",
+    user     = "tester",
+    password = "password123"
+  )
+
+# List a remote directory
+sftp_list(sftp_conn, .recursive = T)
+sftp_list(sftp_conn, "127.0.0.1/upload", .recursive = T)
+
+# Upload
+## a data frame
+sftp_upload(sftp_conn, local_file = mtcars, "upload/mtcars.csv")
+## a local file
+sftp_upload(sftp_conn, local_file = "/home/path/file.txt", "upload/file.txt")
+
+# Download
+sftp_download(sftp_conn, "upload/file.txt")
+
+# Create a remote directory
+sftp_mkdir(sftp_conn, "upload/archive")
+
+# Rename / Move
+sftp_rename(sftp_conn, "upload/file.txt", "upload/archive/file.backup")
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+## Notes and Requirements
 
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
+- This package relies on `libcurl` with SFTP support (libssh2).
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this.
+## Contributing
 
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
-
-## Note to self why I separate out sftp\_\* functions from R6
-
-1.  Documentation readability (avoid R6)
-2.  Pipeability: conn \|\> sftp\_\*
-3.  Possible S3 dispatch and extensibility (Amazon?)
-4.  Functional purity and testing
-5.  Discoverability (tab complete)
+- Please open issues or pull requests. Follow the existing code stles
+  and update/include tests for behavioural changes.
