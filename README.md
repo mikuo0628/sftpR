@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/mikuo0628/sftpR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mikuo0628/sftpR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Robust SFTP tooling for R built on top of the

@@ -2,3 +2,16 @@
 ^renv\.lock$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^README\.Rmd$
+^LICENSE\.md$
+^upload$
+^download$
+^\.editorconfig
+^\.devcontainer
+^\.github
+^\.vscode
+^DEV_PLAN.md
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$

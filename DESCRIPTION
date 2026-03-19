@@ -3,7 +3,12 @@ Type: Package
 Title: Robust 'SFTP' Interface Using 'curl'
 Version: 0.1.0
 Authors@R: c(
-    person("Michael", "Kuo", , "michael.kuo@bccdc.ca", role = c("aut", "cre"))
+    person(
+        "Michael", 
+        "Kuo", , 
+        "michael.kuo@bccdc.ca", 
+        role = c("aut", "cre")
+    )
   )
 Description: Provides a high-level, object-oriented interface for Secure 
     File Transfer Protocol ('SFTP') operations built upon the 'curl' 
@@ -20,7 +25,6 @@ Description: Provides a high-level, object-oriented interface for Secure
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Config/testthat/edition: 3
 SystemRequirements: libcurl: libcurl (with libssh2 support)
 Imports: 
     curl,
@@ -30,3 +34,4 @@ RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+URL: https://mikuo0628.github.io/sftpR/

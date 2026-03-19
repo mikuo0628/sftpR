@@ -4,14 +4,28 @@
 \alias{sftp_list}
 \title{List and Crawl SFTP Directory Contents}
 \usage{
-sftp_list(sftp_conn = NULL, .recursive = FALSE)
+sftp_list(
+  sftp_conn = NULL,
+  sftp_url = NULL,
+  .verbose = TRUE,
+  .recursive = FALSE,
+  .check = .recursive
+)
 }
 \arguments{
 \item{sftp_conn}{A \code{SFTPConn} object containing connection details and
 authentication. Created by \code{\link{sftp_connect}}.}
 
+\item{sftp_url}{A SFTP URL of which the contents will be listed. If `NULL`,
+the base URL in \code{SFTPConn} will be used: contents of the SFTP home
+folder will be listed.}
+
 \item{.recursive}{Logical. If \code{TRUE}, recursively enters subdirectories
 to return a flattened tree of all remote objects. Defaults to \code{FALSE}.}
+
+\item{.check}{Logical. If \code{TRUE}, determines \code{sftp_url} is a
+directory or a file, and modify the URL appropriately if needed.
+Defaults to value of \code{.recursive}.}
 }
 \value{
 A \code{data.frame} containing remote file/directory metadata:

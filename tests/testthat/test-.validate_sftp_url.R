@@ -1,17 +1,21 @@
 test_that(
-  "SFTP URLs are validated",
+  "SFTP URLs are correctly validated",
   {
-    # TODO: NEEDS TO FIX
+    # CRAN Requirement: Skip if the resource is unavailable
+    skip_if_not(has_test_sftp(), "SFTP Container not reachable")
+
+    # establish connection
     expect_warning(
       sftp_conn <-
-        sftp_connect$new(
+        sftp_connect(
           hostname = "sftp://127.0.0.1:2222/",
           user     = "tester",
           password = "password123",
           .verbose = TRUE
         ),
-      "overwriting existing argument `port`", ignore.case = T
+      "Overwriting existing argument"
     )
+
     correct_url <- "sftp://127.0.0.1:2222/upload/mtcars.csv"
     bad_url_1 <- "sftp:/127.0.0.1:2222/upload/mtcars.csv"
     bad_url_2 <- "127.0.0.1:2222/upload/mtcars.csv"
@@ -28,9 +32,9 @@ test_that(
 
     expect_warning(
       expect_equal(.validate_sftp_url(sftp_conn, bad_url_4), correct_url),
-      "protocol|hostname|port",
-      ignore.case = TRUE
+      "protocol|hostname|port"
     )
+
     expect_equal(.validate_sftp_url(sftp_conn, bad_url_5), correct_url)
 
     expect_warning(

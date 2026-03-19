@@ -2,182 +2,33 @@
 % Please edit documentation in R/sftp_connect.R
 \name{sftp_connect}
 \alias{sftp_connect}
-\title{SFTP Connection Class}
-\value{
-An `SFTPConn` object with methods for connection management and
-file uploads.
+\title{Create an \code{SFTPConn} R6 object that contains important connection
+information safely.}
+\usage{
+sftp_connect(
+  protocol = "sftp",
+  hostname = "localhost",
+  path = NULL,
+  port = 22L,
+  user = NA_character_,
+  password = NA_character_,
+  timeout = 30L,
+  ...,
+  .verbose = TRUE
+)
 }
 \description{
-An R6 class to manage SFTP connections, handle authentication, and perform
-robust file transfers using \code{curl}. Credentials and handles are stored
-internally to prevent repeated authentication.
-}
-\details{
-The class uses a "streaming" upload mechanism (via \code{readfunction}) to
-handle large files efficiently without loading them entirely into memory.
+Create an \code{SFTPConn} R6 object that contains important connection
+information safely.
 }
 \examples{
 \dontrun{
 # Create a new SFTP connection
-sftp_conn <- sftp_connect$new(
+sftp_conn <- sftp_connect(
   hostname = "127.0.0.1",
   port     = 2222,
-  username = "tester",
+  user     = "tester",
   password = "password123",
 }
 
-}
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{protocol}}{The connection protocol (defaults to "sftp://").}
-
-\item{\code{hostname}}{The server address or IP.}
-
-\item{\code{folder}}{The target subdirectory on the server.}
-
-\item{\code{port}}{The port number (defaults to 22).}
-
-\item{\code{timeout}}{Connection timeout in seconds.}
-
-\item{\code{h}}{The internal curl handle used for connection checks.}
-
-\item{\code{.verbose}}{Logical; if TRUE, prints detailed curl output.}
-}
-\if{html}{\out{</div>}}
-}
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{clean_url}}{Returns the processed SFTP URL via internal
-\code{.build_sftp_url}.}
-}
-\if{html}{\out{</div>}}
-}
-\section{Methods}{
-\subsection{Public methods}{
-\itemize{
-\item \href{#method-SFTPConn-new}{\code{sftp_connect$new()}}
-\item \href{#method-SFTPConn-connection_ok}{\code{sftp_connect$connection_ok()}}
-\item \href{#method-SFTPConn-print}{\code{sftp_connect$print()}}
-\item \href{#method-SFTPConn-.upload_handle}{\code{sftp_connect$.upload_handle()}}
-\item \href{#method-SFTPConn-clone}{\code{sftp_connect$clone()}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-SFTPConn-new"></a>}}
-\if{latex}{\out{\hypertarget{method-SFTPConn-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new SFTP connection object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{sftp_connect$new(
-  protocol = "sftp://",
-  hostname = "localhost",
-  folder = NULL,
-  port = 22L,
-  username = NA_character_,
-  password = NA_character_,
-  timeout = 30L,
-  ...,
-  .verbose = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{protocol}}{Character. Protocol string.}
-
-\item{\code{hostname}}{Character. Server URL or IP.}
-
-\item{\code{folder}}{Character. Sub-path on server.}
-
-\item{\code{port}}{Integer. Port number.}
-
-\item{\code{username}}{Character. SFTP account name.}
-
-\item{\code{password}}{Character. SFTP password.}
-
-\item{\code{timeout}}{Integer. Connection timeout.}
-
-\item{\code{...}}{Additional arguments passed to \code{curl::handle_setopt()}.}
-
-\item{\code{.verbose}}{Logical. Toggle verbose output.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new `SFTPConn` object.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-SFTPConn-connection_ok"></a>}}
-\if{latex}{\out{\hypertarget{method-SFTPConn-connection_ok}{}}}
-\subsection{Method \code{connection_ok()}}{
-Checks if the current connection settings and credentials are valid.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{sftp_connect$connection_ok()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-Logical; TRUE if connection is successful.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-SFTPConn-print"></a>}}
-\if{latex}{\out{\hypertarget{method-SFTPConn-print}{}}}
-\subsection{Method \code{print()}}{
-Custom print method to display connection status without exposing
-passwords.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{sftp_connect$print(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Unused.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-SFTPConn-.upload_handle"></a>}}
-\if{latex}{\out{\hypertarget{method-SFTPConn-.upload_handle}{}}}
-\subsection{Method \code{.upload_handle()}}{
-Internal method to generate a specialized upload handle with streaming.
-Adapted from \code{curl::curl_upload()}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{sftp_connect$.upload_handle(local_file, reuse = TRUE, ...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{local_file}}{Path to file, data.frame, or connection.}
-
-\item{\code{reuse}}{Logical; try to keep connection alive.}
-
-\item{\code{...}}{Additional options for \code{curl::handle_setopt()}.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-SFTPConn-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-SFTPConn-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{sftp_connect$clone(deep = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }
