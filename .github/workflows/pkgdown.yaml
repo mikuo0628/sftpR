@@ -34,10 +34,17 @@ jobs:
         with:
           use-public-rspm: true
 
+      # - name: Kill rogue R processes (Safety)
+      #   run: |
+      #     pkill -f R || true
+      #     rm -rf /usr/local/lib/R/site-library/00LOCK* || true
+      #   shell: bash
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
+          upgrade: 'TRUE'
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
