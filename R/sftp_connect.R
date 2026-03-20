@@ -72,6 +72,8 @@ sftp_conn_generator <- R6::R6Class(
     h = NULL,
     #' @field .verbose Logical; if TRUE, prints detailed curl output.
     .verbose = TRUE,
+    #' @field last_error Character string of the last connection error.
+    last_error = NULL,
 
     #' @description
     #' Create a new SFTP connection object.
@@ -127,9 +129,11 @@ sftp_conn_generator <- R6::R6Class(
         if (isFALSE(self$connection_ok())) {
           stop(
             paste0(
-              "\nCannot connect to SFTP server at ",
-              self$clean_url$full_url,
-              ". Please check your connection settings and credentials."
+              sprintf(
+                "\nCannot connect to SFTP server at %s.\n",
+                self$clean_url$full_url
+              ),
+              self$last_error
             )
           )
         }
@@ -139,14 +143,17 @@ sftp_conn_generator <- R6::R6Class(
     #' Checks if the current connection settings and credentials are valid.
     #' @return Logical; TRUE if connection is successful.
     connection_ok = function() {
-      status <- TRUE
       host_check <-
         try(
           silent = TRUE,
           curl::curl_fetch_memory(self$clean_url$full_url, handle = self$h)
         )
-      if (inherits(host_check, "try-error")) status <- FALSE
-      return(status)
+      if (inherits(host_check, "try-error")) {
+        self$last_error <- conditionMessage(attr(resp, "condition"))
+        return(FALSE)
+      }
+      self$last_error <- NULL
+      return(TRUE)
     },
 
     #' @description
