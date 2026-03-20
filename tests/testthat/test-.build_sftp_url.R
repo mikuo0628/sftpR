@@ -1,6 +1,7 @@
 test_that(
   "SFTP URL building and parsing and warning expectedly",
   {
+    # testthat::skip("Temporarily disabled for debugging")
     expect_equal(
       .build_sftp_url(
         protocol = "sftp://",

@@ -1,53 +1,41 @@
 test_that(
   "Connection valid",
   {
-    expect_warning(
-      sftp_conn_good <-
-        sftp_connect(
-          hostname = "sftp://127.0.0.1:2222/",
-          user     = "tester",
-          password = "password123",
-          .verbose = TRUE
-        ),
-      "overwriting existing argument `port`",
-      ignore.case = TRUE
-    )
-    expect_true(sftp_conn_good$connection_ok())
-    expect_equal(sftp_conn_good$clean_url$port, "2222")
+    # CRAN Requirement: Skip if the resource is unavailable
+    skip_if_not(has_test_sftp(), "SFTP Container not reachable")
 
-    expect_error(
-      sftp_connect(
-        hostname = "sftp://127.0.0.1:2222/",
-        user     = "tester1",
-        password = "password123",
-        port     = 2222
-      ),
-      "Please check your connection settings and credentials.",
-      ignore.case = TRUE
-    )
-    expect_error(
-      sftp_connect(
-        hostname = "sftp://127.0.0.1:2222//test_dir",
-        user     = "tester",
-        password = "password123",
-        port     = 2222
-      ),
-      "Absolute paths using `//` are not supported",
-      ignore.case = TRUE
-    )
+    # establish connection
+    sftp_conn_good <- sftp_conn_test(TRUE)
+
+    expect_true(sftp_conn_good$connection_ok())
+
+    # time out on non-existent host
     sftp_connect(
-      hostname = "sftp://tester@127.0.0.1:2222",
+      hostname = "sftp://2.2.2.2:2222/",
+      user     = "tester1",
+      password = "password123",
+      port     = 2222,
+      timeout  = 3L
+    ) |>
+      expect_error("Cannot connect")
+
+    # detects root slashes
+    sftp_connect(
+      hostname = "sftp://127.0.0.3:2222//test_dir",
+      user     = "tester",
+      password = "password123",
+      port     = 2222
+    ) |>
+      expect_error("Absolute paths using `//` are not supported")
+
+    sftp_connect(
+      hostname = paste0("tester@", paste(get_conn_info(), collapse = ":")),
       user     = "user",
+      port     = "11",
       password = "password123"
     ) |>
-      expect_warning(
-        "it is more preferrable to use the `user` argument", ignore.case = TRUE
-      ) |>
-      expect_warning(
-        "overwriting existing argument `user`", ignore.case = TRUE
-      ) |>
-      expect_warning(
-        "overwriting existing argument `port`", ignore.case = TRUE
-      )
+      expect_warning("A user name .* different than the `user` arg") |>
+      expect_warning("Overwriting existing argument `user`") |>
+      expect_warning("Overwriting existing argument `port`")
   }
 )

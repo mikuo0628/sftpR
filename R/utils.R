@@ -288,29 +288,29 @@
   if (!isTRUE(all(checks))) {
     # Replace the mismatched with the appropriate valuess
     # from sftp_conn$clean_url, print warning
-    for (part in names(which(checks == FALSE))) {
-      .verbose_msg(
-        .verbose = sftp_conn$.verbose,
-        sprintf(
-          paste(
-            "\nThe following parts parsed form the provided SFTP URL",
-            "do not match the `SFTPConn` connection,",
-            "and will be replaced:\n%s\n"
-          ),
-          paste0(
-            "  - ", names(which(checks == FALSE)), ": ",
-            sprintf(
-              "\"%s\" ===> \"%s\"",
-              parts[[part]], sftp_conn$clean_url[[part]]
-            ),
-            collapse = "\n"
-          )
+    incorrect_parts <- names(which(checks == FALSE))
+    .verbose_msg(
+      .verbose = .verbose,
+      sprintf(
+        paste(
+          "\nThe following parts parsed form the provided SFTP URL",
+          "do not match the `SFTPConn` connection,",
+          "and will be replaced:\n%s\n"
         ),
-        warning
-      )
+        paste0(
+          "  - ", incorrect_parts, ": ",
+          sprintf(
+            "\"%s\" ===> \"%s\"",
+            parts[incorrect_parts],
+            sftp_conn$clean_url[incorrect_parts]
+          ),
+          collapse = "\n"
+        )
+      ),
+      warning
+    )
 
-      parts[part] <- sftp_conn$clean_url[[part]]
-    }
+    parts[incorrect_parts] <- sftp_conn$clean_url[incorrect_parts]
   }
 
   user_url <-

@@ -1,50 +1,58 @@
 test_that(
-  "SFTP URLs are correctly validated",
+  "Minor SFTP URL issues are fixed",
   {
     # CRAN Requirement: Skip if the resource is unavailable
     skip_if_not(has_test_sftp(), "SFTP Container not reachable")
 
     # establish connection
-    expect_warning(
-      sftp_conn <-
-        sftp_connect(
-          hostname = "sftp://127.0.0.1:2222/",
-          user     = "tester",
-          password = "password123",
-          .verbose = TRUE
-        ),
-      "Overwriting existing argument"
-    )
+    sftp_conn <- sftp_conn_test(.verbose = TRUE)
 
-    correct_url <- "sftp://127.0.0.1:2222/upload/mtcars.csv"
-    bad_url_1 <- "sftp:/127.0.0.1:2222/upload/mtcars.csv"
-    bad_url_2 <- "127.0.0.1:2222/upload/mtcars.csv"
-    bad_url_3 <- "127.0.0.1/upload/mtcars.csv"
-    bad_url_4 <- "sftp://user@128.0.0.1/upload/mtcars.csv"
-    bad_url_5 <- "/upload/mtcars.csv"
-    bad_url_6 <- "upload/mtcars.csv"
-    bad_url_7 <- "//upload/mtcars.csv"
-    bad_url_8 <- "sftp://127.0.0.1:2222//upload/mtcars.csv"
+    base_url <- sprintf("sftp://%s/", paste(get_conn_info(), collapse = ":"))
+    relative_url <- "upload/mtcars.csv"
+    correct_url <- paste0(base_url, relative_url)
 
-    expect_equal(.validate_sftp_url(sftp_conn, bad_url_1), correct_url)
-    expect_equal(.validate_sftp_url(sftp_conn, bad_url_2), correct_url)
-    expect_equal(.validate_sftp_url(sftp_conn, bad_url_3), correct_url)
+    # fix typo
+    .validate_sftp_url(sftp_conn, gsub("\\d+", "1", correct_url)) |>
+      expect_equal(correct_url) |>
+      expect_warning("replaced")
 
-    expect_warning(
-      expect_equal(.validate_sftp_url(sftp_conn, bad_url_4), correct_url),
-      "protocol|hostname|port"
-    )
+    # relative path works
+    .validate_sftp_url(sftp_conn, paste0("/", relative_url)) |>
+      expect_equal(correct_url)
 
-    expect_equal(.validate_sftp_url(sftp_conn, bad_url_5), correct_url)
+    # relative path works, warning
+    .validate_sftp_url(sftp_conn, relative_url) |>
+      expect_equal(correct_url) |>
+      expect_warning("replaced")
 
-    expect_warning(
-      expect_equal(.validate_sftp_url(sftp_conn, bad_url_6), correct_url),
-      "protocol|hostname|port",
-      ignore.case = TRUE
-    )
-    expect_equal(.validate_sftp_url(sftp_conn, bad_url_7), correct_url) |>
-      expect_warning("root access attempt detected", ignore.case = TRUE)
-    expect_equal(.validate_sftp_url(sftp_conn, bad_url_8), correct_url) |>
-      expect_warning("root access attempt detected", ignore.case = TRUE)
+    # replace missing parts
+    .validate_sftp_url(sftp_conn, gsub("sftp://", "", correct_url)) |>
+      expect_equal(correct_url)
+
+    # replace missing parts
+    .validate_sftp_url(sftp_conn, gsub(":\\d+", "", correct_url)) |>
+      expect_equal(correct_url)
+
+    # replace incorrect parts
+    .validate_sftp_url(sftp_conn, gsub(":\\d+", ":11", correct_url)) |>
+      expect_equal(correct_url) |>
+      expect_warning("replaced")
+
+    # double slashes fix
+    .validate_sftp_url(sftp_conn, paste0("//", relative_url)) |>
+      expect_equal(correct_url) |>
+      expect_warning("Root access")
+
+    # double slashes fix
+    .validate_sftp_url(sftp_conn, gsub(":\\d+", "/", correct_url)) |>
+      expect_equal(correct_url) |>
+      expect_warning("Root access")
+
+    # double slashes can't fix
+    .validate_sftp_url(
+      sftp_conn, gsub("(sftp://|:\\d+/)", "//", correct_url)
+    ) |>
+      expect_error("Absolute paths") |>
+      expect_warning("Root access")
   }
 )

@@ -5,14 +5,8 @@ test_that(
     skip_if_not(has_test_sftp(), "SFTP Container not reachable")
 
     # establish connection
-    sftp_conn <-
-      sftp_connect(
-        hostname = "127.0.0.1",
-        port     = "2222",
-        user     = "tester",
-        password = "password123",
-        .verbose = FALSE
-      )
+    sftp_conn <- sftp_conn_test()
+    base_url <- sprintf("sftp://%s/", paste(get_conn_info(), collapse = ":"))
 
     # create a subdir with existing parent
     sftp_mkdir(
@@ -21,47 +15,47 @@ test_that(
       .recursive = FALSE,
       .verbose = TRUE
     ) |>
-      expect_message("mkdir upload/test_mkdir", ignore.case = TRUE) |>
-      expect_message("successfully created", ignore.case = TRUE)
+      expect_message("upload/test_mkdir") |>
+      expect_message("Successfully created") |>
+      expect_warning("do not match.*will be replaced")
 
     withr::defer(
       sftp_delete(
         sftp_conn,
-        remote_url = "sftp://127.0.0.1:2222/upload/test_mkdir",
+        remote_url = paste0(base_url, "upload/test_mkdir"),
         .verbose = FALSE,
-        .recursive = TRUE
+        .recursive = FALSE
       )
     )
 
     # create a sbudir with no existing parent
-    expect_error(
-      sftp_mkdir(
-        sftp_conn,
-        remote_url = "upload/test_mkdir2/test",
-        .recursive = FALSE,
-        .verbose = FALSE
-      ),
-      "Missing parent directory"
-    )
+    sftp_mkdir(
+      sftp_conn,
+      remote_url = "upload/test_mkdir2/test",
+      .recursive = FALSE,
+      .verbose = FALSE
+    ) |>
+      expect_error("Missing parent directory")
 
     # create a subdir with no existing parent, but use .recursive
     sftp_mkdir(
       sftp_conn,
-      remote_url = "upload/test_mkdir2/test/",
+      remote_url = "upload/test_mkdir2/test",
       .recursive = TRUE,
       .verbose = TRUE
     ) |>
-      expect_message("*mkdir upload", ignore.case = TRUE) |>
-      expect_message("successfully created", ignore.case = TRUE) |>
-      expect_message("*mkdir upload/test_mkdir2", ignore.case = TRUE) |>
-      expect_message("successfully created", ignore.case = TRUE) |>
-      expect_message("*mkdir upload/test_mkdir2/test", ignore.case = TRUE) |>
-      expect_message("successfully created", ignore.case = TRUE)
+      expect_message("\\*mkdir upload") |>
+      expect_message("Successfully created") |>
+      expect_message("\\*mkdir upload/test_mkdir2") |>
+      expect_message("Successfully created") |>
+      expect_message("\\*mkdir upload/test_mkdir2/test") |>
+      expect_message("Successfully created") |>
+      expect_warning("do not match.*will be replaced")
 
     withr::defer(
       sftp_delete(
         sftp_conn,
-        remote_url = "sftp://127.0.0.1:2222/upload/test_mkdir2",
+        remote_url = paste0(base_url, "upload/test_mkdir2"),
         .verbose = FALSE,
         .recursive = TRUE
       )
