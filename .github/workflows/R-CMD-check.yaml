@@ -112,6 +112,7 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          cache: false
       
       # - name: Fast SFTP Connection Test
       #   run: |
