@@ -1,7 +1,8 @@
 # Check for connectivity once at the start
-if (!has_test_sftp()) {
+test_sftp <- has_test_sftp()
+if (is.character(test_sftp)) {
   message(
-    "SFTP test container not found at 127.0.0.1:2222.",
+    sprintf("SFTP test container not found: %s\n", test_sftp),
     "\nSkipping SFTP integration tests."
   )
 }
