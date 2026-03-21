@@ -224,7 +224,7 @@
 #' @param user_url
 #'   Character string. The destination SFTP URL or path provided by the user.
 #'
-#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+#' @param .verbose logical. Defaults to `TRUE`. Prints verbose messages.
 #'
 #' @details
 #' The function performs the following steps:

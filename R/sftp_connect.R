@@ -1,10 +1,10 @@
 #' Create an \code{SFTPConn} R6 object that contains important connection
 #' information safely.
 #' 
-#' @inherit SFTPConnGenerator description
-#' @inheritParams SFTPConnGenerator
-#' @inherit SFTPConnGenerator detail
-#' @inherit SFTPConnGenerator return
+#' @inherit sftp_conn_generator description
+#' @inheritParams sftp_conn_generator
+#' @inherit sftp_conn_generator details
+#' @inherit sftp_conn_generator return
 #' @examples
 #' \dontrun{
 #' # Create a new SFTP connection
@@ -47,6 +47,16 @@ sftp_connect <- function(
 #' robust file transfers using \code{curl}. Credentials and handles are stored
 #' internally to prevent repeated authentication.
 #'
+#' @param protocol Character. Protocol string.
+#' @param hostname Character. Server URL or IP.
+#' @param path Character. Sub-path on server.
+#' @param port Integer. Port number.
+#' @param user Character. SFTP account name.
+#' @param password Character. SFTP password.
+#' @param timeout Integer. Connection timeout.
+#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+#' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
+#'
 #' @details
 #' The class uses a "streaming" upload mechanism (via \code{readfunction}) to
 #' handle large files efficiently without loading them entirely into memory.
@@ -75,18 +85,6 @@ sftp_conn_generator <- R6::R6Class(
     #' @field last_error Character string of the last connection error.
     last_error = NULL,
 
-    #' @description
-    #' Create a new SFTP connection object.
-    #' @param protocol Character. Protocol string.
-    #' @param hostname Character. Server URL or IP.
-    #' @param path Character. Sub-path on server.
-    #' @param port Integer. Port number.
-    #' @param user Character. SFTP account name.
-    #' @param password Character. SFTP password.
-    #' @param timeout Integer. Connection timeout.
-    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
-    #' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
-    #' @return A new `SFTPConn` object.
     initialize =
       function(protocol = "sftp",
                hostname = "localhost",
