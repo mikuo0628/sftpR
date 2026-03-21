@@ -46,6 +46,9 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
           cache: false
+        env:
+          # start a fresh subprocess and ignore existing R sessions
+          PAK_PORTABLE: true
       
       - name: Create local volume "upload" for testing
         run: |
