@@ -63,7 +63,7 @@ sftp_rename <- function(
       remote_url =
         paste0(
           sftp_conn$clean_url$full_url,
-          dirname(.parse_sftp_url(remote_url_to)$path)
+          dirname(.parse_sftp_url(remote_url$remote_url_to)$path)
         ),
       .recursive = .recursive,
       .verbose = .verbose,
