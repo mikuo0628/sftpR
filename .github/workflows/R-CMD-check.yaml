@@ -1,0 +1,147 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+name: R-CMD-check.yaml
+
+permissions: read-all
+
+jobs:
+  R-CMD-check:
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+    #     config:
+    #       - {os: ubuntu-latest, r: 'release'}
+    #       - {os: windows-latest, r: 'release'}
+    #       - {os: macos-latest,   r: 'release'}
+    
+    # runs-on: ${{ matrix.config.os }}
+    # name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    runs-on: ubuntu-latest
+          
+    env:
+      github_pat: ${{ secrets.github_token }}
+      R_KEEP_PKG_SOURCE: yes
+      RENV_CONFIG_ACTIVATE: false
+      SFTP_USER: tester
+      SFTP_PASS: password123
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create local volume "upload" for testing
+        run: |
+          mkdir -p ${{ github.workspace }}/upload
+          chmod -R 777 ${{ github.workspace }}/upload
+        shell: bash
+
+      - name: Manual SFTP Start
+        run: |
+          docker rm -f sftp || true
+          
+          # Finds the act network, or defaults to 'bridge' if it's empty
+          NETWORK_NAME=$(docker network ls --filter "name=act-R-CMD-check" --format "{{.Name}}" | head -n 1)
+          if [ -z "$NETWORK_NAME" ]; then NETWORK_NAME="bridge"; fi
+          
+          # Start the container
+          docker run -d --name sftp \
+            -p 2223:22 \
+            --network "$NETWORK_NAME" \
+            -e SFTP_USERS="tester:password123:::upload" \
+            -v ${{ github.workspace }}/upload:/home/tester/upload \
+            atmoz/sftp:latest
+          
+          # echo "Waiting 10s for initialization..."
+          # sleep 10
+          
+          # echo "--- CONTAINER STATUS ---"
+          # docker ps -a --filter "name=sftp"
+          
+          # echo "--- CONTAINER LOGS ---"
+          # docker logs sftp || echo "Could not get logs"
+        shell: bash
+
+      - name: Verify and Export SFTP IP and save SSH keys
+        run: |
+          # Small delay just in case
+          sleep 5
+
+          # 1. Get the IP
+          SFTP_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' sftp)
+          
+          # 2. Add it to /etc/hosts so 'sftp' works for CLI tools (like curl/ssh)
+          echo "$SFTP_IP sftp" | sudo tee -a /etc/hosts
+          
+          # 3. Export to the GitHub 'env' so R can see it
+          # Detect if we are in 'act' or real GitHub Actions
+          if [ "$ACT" = "true" ]; then
+            echo "SFTP_HOST=$SFTP_IP" >> $GITHUB_ENV
+            echo "SFTP_PORT=22" >> $GITHUB_ENV
+          else
+            echo "SFTP_HOST=127.0.0.1" >> $GITHUB_ENV
+            echo "SFTP_PORT=2223" >> $GITHUB_ENV
+          fi
+          echo "SFTP_INTERNAL_IP=$SFTP_IP" >> $GITHUB_ENV
+          echo "SFTP is ready at $SFTP_IP (aliased as 'sftp')"
+
+          # 4. Create the .ssh directory if it doesn't exist
+          mkdir -p ~/.ssh
+          
+          # This command grabs the keys you saw in the logs and 
+          # saves them as "trusted" for the Runner
+          ## Retry keyscan up to 5 times if it fails initially
+          for i in {1..5}; do 
+            ssh-keyscan -H sftp >> ~/.ssh/known_hosts && break || sleep 5
+          done
+          ssh-keyscan -H "$SFTP_IP" >> ~/.ssh/known_hosts
+        shell: bash
+
+      - uses: r-lib/actions/setup-pandoc@v2 # Added for vignettes
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+      
+      # - name: Fast SFTP Connection Test
+      #   run: |
+      #     Rscript -e '
+      #       # Simple test to see if R can talk to the IP
+      #       host     <- Sys.getenv("SFTP_INTERNAL_IP")
+      #       user     <- Sys.getenv("SFTP_USER")
+      #       password <- "password123"
+
+      #       sprintf("User: %s\nPassword: %s\n", user, password)
+      #       print(paste("Attempting to connect to:", host))
+      #       h <- curl::new_handle(
+      #         userpwd = paste0(user, ":", password),
+      #         ssh_auth_types = 2,
+      #         verbose = TRUE,
+      #         timeout = 30L
+      #       )
+      #       curl::curl_fetch_memory(paste0("sftp://", host, ":22/"), handle = h)
+      #     '
+      #   env:
+      #     SFTP_INTERNAL_IP: ${{ env.SFTP_INTERNAL_IP }}
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          # Vital: Added --as-cran to catch internal documentation issues
+          args: 'c("--no-manual", "--as-cran")' 
+          build_args: '"--compact-vignettes=gs+qpdf"'
+        env:
+          SFTP_HOST: sftp
+      
+      - name: Cleanup SFTP
+        if: always()
+        run: docker rm -f sftp || true
