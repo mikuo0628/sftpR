@@ -58,20 +58,10 @@ sftp_conn_test <- function(.verbose = FALSE) {
         .verbose = .verbose
       ),
       list(
-        # resolve = sprintf("sftp:%s:%s", conn_info$port, conn_info$host),
         ssh_knownhosts = NULL,
-        ssl_verifyhost = 0
+        ssl_verifyhost = 0,
+        ssl_verifypeer = FALSE
       )
-      # if (conn_info$host == "127.0.0.1") {
-      #   NULL
-      #   list(
-      #     resolve = sprintf("sftp:%s:%s", conn_info$port, conn_info$host),
-      #     ssh_knownhosts = NULL,
-      #     ssl_verifyhost = 0
-      #   )
-      # } else {
-      #   NULL
-      # }
     )
   return(do.call(sftp_connect, conn_args))
 }
