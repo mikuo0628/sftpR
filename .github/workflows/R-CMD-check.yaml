@@ -28,6 +28,7 @@ jobs:
       github_pat: ${{ secrets.github_token }}
       R_KEEP_PKG_SOURCE: yes
       RENV_CONFIG_ACTIVATE: false
+      R_PROFILE_USER: .nonexistent_profile
       SFTP_USER: tester
       SFTP_PASS: password123
 
