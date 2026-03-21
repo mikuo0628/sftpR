@@ -82,39 +82,37 @@ jobs:
           # docker logs sftp || echo "Could not get logs"
         shell: bash
 
-      - name: Verify and Export SFTP IP and save SSH keys
+      - name: Verify and Export SFTP Settings
         run: |
-          # Small delay just in case
-          sleep 5
-
-          # 1. Get the IP
+          # 1. Get the Internal IP
           SFTP_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' sftp)
+          echo "SFTP_INTERNAL_IP=$SFTP_IP" >> $GITHUB_ENV
           
-          # 2. Add it to /etc/hosts so 'sftp' works for CLI tools (like curl/ssh)
-          echo "$SFTP_IP sftp" | sudo tee -a /etc/hosts
-          
-          # 3. Export to the GitHub 'env' so R can see it
-          # Detect if we are in 'act' or real GitHub Actions
+          # 2. Environment-Specific Host/Port Logic
           if [ "$ACT" = "true" ]; then
             echo "SFTP_HOST=$SFTP_IP" >> $GITHUB_ENV
             echo "SFTP_PORT=22" >> $GITHUB_ENV
+            SCAN_TARGETS="sftp $SFTP_IP"
+            SCAN_PORT="22"
           else
             echo "SFTP_HOST=127.0.0.1" >> $GITHUB_ENV
             echo "SFTP_PORT=2223" >> $GITHUB_ENV
+            # In Cloud, we MUST scan the mapped localhost port
+            SCAN_TARGETS="127.0.0.1"
+            SCAN_PORT="2223"
           fi
-          echo "SFTP_INTERNAL_IP=$SFTP_IP" >> $GITHUB_ENV
-          echo "SFTP is ready at $SFTP_IP (aliased as 'sftp')"
 
-          # 4. Create the .ssh directory if it doesn't exist
+          # 3. Network Alias
+          echo "$SFTP_IP sftp" | sudo tee -a /etc/hosts
+
+          # 4. SSH Key Trusting (The "Fix")
           mkdir -p ~/.ssh
-          
-          # This command grabs the keys you saw in the logs and 
-          # saves them as "trusted" for the Runner
-          ## Retry keyscan up to 5 times if it fails initially
-          for i in {1..5}; do 
-            ssh-keyscan -H sftp >> ~/.ssh/known_hosts && break || sleep 5
+          for target in $SCAN_TARGETS; do
+            echo "Scanning $target on port $SCAN_PORT..."
+            for i in {1..5}; do
+              ssh-keyscan -p $SCAN_PORT -H $target >> ~/.ssh/known_hosts && break || sleep 5
+            done
           done
-          ssh-keyscan -H "$SFTP_IP" >> ~/.ssh/known_hosts
         shell: bash
       
       # - name: Fast SFTP Connection Test
