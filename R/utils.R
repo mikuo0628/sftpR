@@ -58,7 +58,7 @@
 
   # If empty, will return "" empty string, not NA
   parts <-
-    setNames(
+    stats::setNames(
       regmatches(url, matches)[[1]][-1],
       c("protocol", "user", "hostname", "port", "path")
     )
@@ -243,17 +243,20 @@
 #'
 #' @keywords internal
 #' @noRd
-.validate_sftp_url <- function(sftp_conn, user_url, .verbose = TRUE) {
+.validate_sftp_url <- function(
+    sftp_conn,
+    user_url,
+    .verbose = sftp_conn$.verbose) {
   if (is.null(user_url) || user_url == "") {
     stop("SFTP URL cannot be empty.")
   }
 
   # Check for Double-Slash (Root Access) Attempt
-  # In curl, sftp://host//path indicates root. We check for // after
+  # In curl, sftp://host//path indicates root. Check for // after
   # the authority or at start.
   if (grepl("://[^/]*//", user_url) || grepl("^//", user_url)) {
     .verbose_msg(
-      .verbose = TRUE,
+      .verbose = .verbose,
       paste(
         "Root access attempt detected (//).",
         "SFTP paths should be relative to your home directory for security.",

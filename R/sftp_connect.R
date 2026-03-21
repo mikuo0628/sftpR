@@ -149,7 +149,7 @@ sftp_conn_generator <- R6::R6Class(
           curl::curl_fetch_memory(self$clean_url$full_url, handle = self$h)
         )
       if (inherits(host_check, "try-error")) {
-        self$last_error <- conditionMessage(attr(resp, "condition"))
+        self$last_error <- conditionMessage(attr(host_check, "condition"))
         return(FALSE)
       }
       self$last_error <- NULL
@@ -191,7 +191,7 @@ sftp_conn_generator <- R6::R6Class(
     #' @param reuse Logical; try to keep connection alive.
     #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
     #' @param ... Additional options for \code{curl::handle_setopt()}.
-    #' @keyword internal
+    #' @keywords internal
     #' @noRd
     .upload_handle =
       function(local_file, reuse = TRUE, .verbose = self$.verbose, ...) {
@@ -467,7 +467,7 @@ sftp_conn_generator <- R6::R6Class(
     #' @return Logical. \code{TRUE} if the resource exists and is accessible;
     #'   \code{FALSE} otherwise.
     #'
-    #' @keyword internal
+    #' @keywords internal
     #' @noRd
     .exists =
       function(sftp_url = NULL) {
@@ -509,7 +509,7 @@ sftp_conn_generator <- R6::R6Class(
     #' @note This method uses a 5-second \code{connecttimeout} to ensure
     #'   the probe doesn't hang on unresponsive servers.
     #'
-    #' @keyword internal
+    #' @keywords internal
     #' @noRd
     .fix_url_type =
       function(remote_url) {
