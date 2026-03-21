@@ -1,6 +1,0 @@
-services:
-  sftp:
-    image: atmoz/sftp
-    ports:
-      - 2222:22
-    args: tester:password123:::upload
