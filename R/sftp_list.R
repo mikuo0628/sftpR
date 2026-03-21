@@ -145,7 +145,7 @@ sftp_list <- function(
   # parse `ls -l` style output into df
   df_objs <-
     data.frame(
-      read.table(
+      utils::read.table(
         text = unlist(strsplit(rawToChar(resp$content), "\n")),
         sep = "",
         fill = TRUE,
