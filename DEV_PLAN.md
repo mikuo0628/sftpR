@@ -110,7 +110,7 @@ remote URLs.
 - URL expectation: callers provide relative paths (recommended); `.validate_sftp_url()` normalizes them. `.quote_handle` strips the base URL and uses a relative POSIX path in the server-side command.
 - Return: `invisible(TRUE)` on success; throws on failure.
 
-### `sftp_mkdir(sftp_conn, remote_url, .recursive = TRUE, .verbose = TRUE, .return_error = !.recursive)`
+### `sftp_mkdir(sftp_conn, remote_url, .recursive = TRUE, .verbose = TRUE, .ignore_error = !.recursive)`
 - Purpose: create a remote directory (optionally recursive).
 - Curl usage: uses `sftp_conn$.quote_handle(..., purpose = "mkdir")`.
   When `.recursive = TRUE`, `ftp_create_missing_dirs` logic may be
