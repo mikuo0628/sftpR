@@ -18,8 +18,17 @@ sftp_connect(
 )
 }
 \description{
-Create an \code{SFTPConn} R6 object that contains important connection
-information safely.
+An R6 class to safely store information needed for SFTP connection,
+with convenient methods to check connections and existence of files or
+directories, and create specific handles that are used in `sftp_*` functions
+for CRUD operations.
+}
+\details{
+One important goal of this designing choice is to keep user credentials
+safe, as private fields. They are used downstream to create necessary
+handles for specific SFTP operations, and users do not need to reenter them.
+This class has a safe printing method for some basic information, and to
+ensure credential is valid for connection.
 }
 \examples{
 \dontrun{
@@ -28,7 +37,8 @@ sftp_conn <- sftp_connect(
   hostname = "127.0.0.1",
   port     = 2222,
   user     = "tester",
-  password = "password123",
+  password = "password123"
+)
 }
 
 }

@@ -25,8 +25,6 @@ If \code{NULL}, attempts to use the basename of the `local_file`.}
 
 \item{.create_dir}{Logical. If \code{TRUE}, recursively creates missing
 remote directories in the path (\code{CURLOPT_FTP_CREATE_MISSING_DIRS}).}
-
-\item{.verbose}{Logical. Defaults to `TRUE`. Prints helpful messages.}
 }
 \value{
 Returns \code{TRUE} (invisibly) on success. Throws an error on failure.

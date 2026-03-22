@@ -5,6 +5,8 @@
 #' server. It manages the libcurl handle lifecycle, ensures connections are
 #' closed, and validates URLs against the connection's "Source of Truth".
 #'
+#' @inheritParams sftp_conn_generator
+#'
 #' @param sftp_conn An \code{SFTPConn} R6 object, created by
 #'   \code{sftp_connect}.
 #'
@@ -18,7 +20,6 @@
 #' @param .create_dir Logical. If \code{TRUE}, recursively creates missing
 #'   remote directories in the path (\code{CURLOPT_FTP_CREATE_MISSING_DIRS}).
 #'
-#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
 #'
 #' @return
 #'   Returns \code{TRUE} (invisibly) on success. Throws an error on failure.
@@ -33,6 +34,7 @@
 #' }
 #'
 #' @export
+#'
 #' @examples
 #' \dontrun{
 #' conn <- sftp_connect(hostname = "sftp.example.com", user = "user")

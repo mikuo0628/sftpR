@@ -35,8 +35,6 @@ directory if it does not exist. Defaults to \code{FALSE}.}
 \item{.overwrite}{Logical. If \code{FALSE} (default), the function willthrow
 an error if a local file already exists at the destination.}
 
-\item{.verbose}{Logical. Defaults to `TRUE`. Prints helpful messages.}
-
 \item{...}{Additional arguments passed to \code{curl::curl_download}.}
 }
 \value{

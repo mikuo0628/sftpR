@@ -1,3 +1,6 @@
+#' @keywords internal
+#'
+#' @noRd
 .verbose_msg <- function(.verbose = FALSE, msg = "", type = message) {
   if (!isTRUE(.verbose)) return(invisible(NULL))
   type <- as.character(substitute(type))
@@ -16,9 +19,9 @@
 #' disallowing absolute paths (indicated by double slashes) and performs
 #' basic sanitization.
 #'
-#' @param url A character string containing the SFTP URL.
+#' @inheritParams sftp_conn_generator
 #'
-#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+#' @param url A character string containing the SFTP URL.
 #'
 #' @return A named list containing:
 #'   \item{protocol}{The scheme (e.g., "sftp").}
@@ -33,6 +36,7 @@
 #' by checking if the captured path starts with a forward slash.
 #'
 #' @keywords internal
+#'
 #' @noRd
 .parse_sftp_url <- function(url, .verbose = TRUE) {
   pattern <-
@@ -97,6 +101,8 @@
 #' if a port or path are found inside `hostname` they will
 #' override the corresponding arguments.
 #'
+#' @inheritParams sftp_conn_generator
+#'
 #' @param protocol single element vector of the protocol designation. Defaults
 #'   to `sftp://`.
 #'
@@ -115,11 +121,11 @@
 #'   sanitize `path` of minor formatting issues, such as extra slashes, and
 #'   ensure a trailing slash if not NULL.
 #'
-#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
 #'
 #' @return A list with components: full_url, protocol, hostname, port, path.
 #'
 #' @keywords internal
+#'
 #' @noRd
 .build_sftp_url <- function(
     protocol = "sftp",
@@ -219,12 +225,12 @@
 #' (double slashes), and corrects any incongruities in the protocol,
 #' hostname, or port.
 #'
+#' @inheritParams sftp_conn_generator
 #' @param sftp_conn An `R6` object of class `SFTPConn`.
 #'
 #' @param user_url
 #'   Character string. The destination SFTP URL or path provided by the user.
 #'
-#' @param .verbose logical. Defaults to `TRUE`. Prints verbose messages.
 #'
 #' @details
 #' The function performs the following steps:
@@ -242,6 +248,7 @@
 #' @return A sanitized character string containing the validated SFTP URL.
 #'
 #' @keywords internal
+#'
 #' @noRd
 .validate_sftp_url <- function(
     sftp_conn,

@@ -1,10 +1,17 @@
+#' @include sftp_connect.R
+NULL
+
 #' Create an \code{SFTPConn} R6 object that contains important connection
 #' information safely.
-#' 
+#'
 #' @inherit sftp_conn_generator description
-#' @inheritParams sftp_conn_generator
+#'
 #' @inherit sftp_conn_generator details
+#'
 #' @inherit sftp_conn_generator return
+#'
+#' @inheritParams sftp_conn_generator
+#'
 #' @examples
 #' \dontrun{
 #' # Create a new SFTP connection
@@ -12,21 +19,21 @@
 #'   hostname = "127.0.0.1",
 #'   port     = 2222,
 #'   user     = "tester",
-#'   password = "password123",
+#'   password = "password123"
+#' )
 #' }
 #'
 #' @export
 sftp_connect <- function(
-  protocol = "sftp",
-  hostname = "localhost",
-  path     = NULL,
-  port     = 22L,
-  user     = NA_character_,
-  password = NA_character_,
-  timeout  = 30L,
-  ...,
-  .verbose = TRUE
-) {
+    protocol = "sftp",
+    hostname = "localhost",
+    path = NULL,
+    port = 22L,
+    user = NA_character_,
+    password = NA_character_,
+    timeout = 30L,
+    ...,
+    .verbose = TRUE) {
   sftp_conn_generator$new(
     protocol = protocol,
     hostname = hostname,
@@ -42,100 +49,125 @@ sftp_connect <- function(
 
 #' SFTP Connection Class
 #'
-#' @description
-#' An R6 class to manage SFTP connections, handle authentication, and perform
-#' robust file transfers using \code{curl}. Credentials and handles are stored
-#' internally to prevent repeated authentication.
+#' @name sftp_conn_generator
 #'
-#' @param protocol Character. Protocol string.
-#' @param hostname Character. Server URL or IP.
-#' @param path Character. Sub-path on server.
-#' @param port Integer. Port number.
-#' @param user Character. SFTP account name.
-#' @param password Character. SFTP password.
-#' @param timeout Integer. Connection timeout.
-#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
-#' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
+#' @description
+#' An R6 class to safely store information needed for SFTP connection,
+#' with convenient methods to check connections and existence of files or
+#' directories, and create specific handles that are used in `sftp_*` functions
+#' for CRUD operations.
 #'
 #' @details
-#' The class uses a "streaming" upload mechanism (via \code{readfunction}) to
-#' handle large files efficiently without loading them entirely into memory.
+#' One important goal of this designing choice is to keep user credentials
+#' safe, as private fields. They are used downstream to create necessary
+#' handles for specific SFTP operations, and users do not need to reenter them.
+#' This class has a safe printing method for some basic information, and to
+#' ensure credential is valid for connection.
 #'
-#' @return
-#' An `SFTPConn` object with methods for connection management and
-#' file uploads.
-#'
+#' @keywords internal
 sftp_conn_generator <- R6::R6Class(
   "SFTPConn",
   public = list(
-    #' @field protocol The connection protocol (defaults to "sftp://").
-    protocol = "sftp://",
+    #' @field protocol The connection protocol.
+    protocol = NULL,
+
     #' @field hostname The server address or IP.
-    hostname = "localhost",
+    hostname = NULL,
+
     #' @field path The target subdirectory on the server.
     path = NULL,
-    #' @field port The port number (defaults to 22).
-    port = 22L,
+
+    #' @field port The port number.
+    port = NULL,
+
     #' @field timeout Connection timeout in seconds.
-    timeout = 30L,
-    #' @field h The internal curl handle used for connection checks.
+    timeout = NULL,
+
+    #' @field h The internal curl handle used for connection checks, listing
+    #'   directories, and download files.
     h = NULL,
+
     #' @field .verbose Logical; if TRUE, prints detailed curl output.
-    .verbose = TRUE,
+    .verbose = NULL,
+
     #' @field last_error Character string of the last connection error.
     last_error = NULL,
 
-    initialize =
-      function(protocol = "sftp",
-               hostname = "localhost",
-               path     = NULL,
-               port     = 22L,
-               user     = NA_character_,
-               password = NA_character_,
-               timeout  = 30L,
-               ...,
-               .verbose = TRUE) {
-        .clean_url <-
-          .build_sftp_url(
-            protocol = protocol,
-            user     = user,
-            hostname = hostname,
-            port     = port,
-            path     = path,
-            .verbose = .verbose
+    #' @description
+    #' Initialize `SFTPConn` class R6 object.
+    #'
+    #' @param protocol Character. Protocol string. Defaults to "sftp".
+    #'
+    #' @param hostname Character. Server URL or IP. Defaults to "localhost".
+    #'
+    #' @param path Character. Sub-path on server.
+    #'
+    #' @param port Character. Port number. Defaults to "22".
+    #'
+    #' @param user Character. SFTP account name.
+    #'
+    #' @param password Character. SFTP password.
+    #'
+    #' @param timeout Integer. Connection timeout.
+    #'
+    #' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
+    #'
+    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+    #'
+    #' @return An `SFTPConn` object with safely stored user credential and
+    #'  convenience methods for various operations, such as checking connection
+    #'  and existence, and creating handles for CRUD operations.
+    #'
+    initialize = function(protocol = "sftp",
+                          hostname = "localhost",
+                          path     = NULL,
+                          port     = "22",
+                          user     = NA_character_,
+                          password = NA_character_,
+                          timeout  = 30L,
+                          ...,
+                          .verbose = TRUE) {
+      .clean_url <-
+        .build_sftp_url(
+          protocol = protocol,
+          user     = user,
+          hostname = hostname,
+          port     = port,
+          path     = path,
+          .verbose = .verbose
+        )
+
+      self$protocol    <- .clean_url$protocol
+      self$hostname    <- .clean_url$hostname
+      self$path        <- .clean_url$path
+      self$port        <- .clean_url$port
+      self$timeout     <- timeout
+      self$.verbose    <- .verbose
+      private$user     <- .clean_url$user
+      private$password <- password
+
+      # check protocol "sftp" exists
+      sftp_check <- "sftp" %in% curl::curl_version()$protocol
+      if (isFALSE(sftp_check)) {
+        stop("Please check if `curl` contains `sftp` protocol")
+      }
+
+      # create base handle
+      self$h <- private$.base_handle(...)
+
+      # Check initial connection
+      if (isFALSE(self$connection_ok())) {
+        stop(
+          paste0(
+            sprintf(
+              "\nCannot connect to SFTP server at %s.\n",
+              self$clean_url$full_url
+            ),
+            self$last_error
           )
-
-        self$protocol    <- .clean_url$protocol
-        self$hostname    <- .clean_url$hostname
-        self$path        <- .clean_url$path
-        self$port        <- .clean_url$port
-        self$timeout     <- timeout
-        self$.verbose    <- .verbose
-        private$user     <- .clean_url$user
-        private$password <- password
-
-        # check protocol "sftp" exists
-        sftp_check <- "sftp" %in% curl::curl_version()$protocol
-        if (isFALSE(sftp_check)) {
-          stop("Please check if `curl` contains `sftp` protocol")
-        }
-
-        # create base handle
-        self$h <- private$.base_handle(...)
-
-        # Check initial connection
-        if (isFALSE(self$connection_ok())) {
-          stop(
-            paste0(
-              sprintf(
-                "\nCannot connect to SFTP server at %s.\n",
-                self$clean_url$full_url
-              ),
-              self$last_error
-            )
-          )
-        }
-      },
+        )
+      }
+    },
 
     #' @description
     #' Checks if the current connection settings and credentials are valid.
@@ -157,6 +189,7 @@ sftp_conn_generator <- R6::R6Class(
     #' @description
     #' Custom print method to display connection status without exposing
     #' passwords.
+    #'
     #' @param ... Unused.
     print = function(...) {
       cat("<SFTP Connection>\n")
@@ -185,12 +218,16 @@ sftp_conn_generator <- R6::R6Class(
     #' @description
     #' Internal method to generate a specialized upload handle with streaming.
     #' Adapted from \code{curl::curl_upload()}.
+    #'
+    #' @inherit sftp_conn_generator description
+    #'
     #' @param local_file Path to file, data.frame, or connection.
+    #'
     #' @param reuse Logical; try to keep connection alive.
-    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+    #'
     #' @param ... Additional options for \code{curl::handle_setopt()}.
-    #' @keywords internal
-    #' @noRd
+    #'
+    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
     .upload_handle =
       function(local_file, reuse = TRUE, .verbose = self$.verbose, ...) {
         # check if `local_file` exists
@@ -281,7 +318,7 @@ sftp_conn_generator <- R6::R6Class(
                   cat(
                     sprintf(
                       "\n\rUploading: %s %d%% (Total filesize: %.2f MB)\n\n",
-                      bar, curr_ten, infilesize / (1024 ^ 2)
+                      bar, curr_ten, infilesize / (1024^2)
                     )
                   )
                   utils::flush.console()
@@ -316,15 +353,44 @@ sftp_conn_generator <- R6::R6Class(
         )
       },
 
+    #' @description
+    #' Createshandle that uses `quote` option. Specifically for deleting,
+    #' creating directories, and renaming files or directories.
+    #'
+    #' @param remote_url_from Character. The URL to delete, to create, or to
+    #'   rename from.
+    #'
+    #' @param remote_url_to Character. The URL to rename to. Ignored for delete
+    #'   or directory create operations.
+    #'
+    #' @param purpose Character. Choose one of 3 options:
+    #'   \itemize{
+    #'      \item "rm": to delete file or directory.
+    #'      \item "mkdir": to create directory. Path should be a directory.
+    #'      \item "rename": to rename
+    #'   }
+    #'
+    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+    #'
+    #' @param .ignore_error Logical. Defaults to `FALSE`. If `TRUE`, error will
+    #'   not interrupt subsequent execution. See [Details]{asterisk}.
+    #'
+    #' @param ... Options that for \code{curl::handle_setopt()}.
+    #'
+    #' @details
+    #'   # Asterisk (`*`) usage with command {asterisk}
+    #'   In `curl`, adding an asterisk (`*`) at the very
+    #'   beginning of a command (ie. one of the 3 used in `purpose` argument)
+    #'   acts as a "fail-safe" or "ignore-error" prefix. It silently ignores
+    #'   any failure returned by the command, and continues without being
+    #'   interrupted by the error.
     .quote_handle =
-      function(
-        remote_url_from = NULL,
-        remote_url_to   = NULL,
-        purpose = c("rm", "mkdir", "rename"),
-        .verbose = self$.verbose,
-        .return_error = TRUE,
-        ...
-      ) {
+      function(remote_url_from = NULL,
+               remote_url_to = NULL,
+               purpose = c("rm", "mkdir", "rename"),
+               .verbose = self$.verbose,
+               .ignore_error = FALSE,
+               ...) {
         # determine dir or file
         remote_url <-
           lapply(
@@ -339,7 +405,9 @@ sftp_conn_generator <- R6::R6Class(
           lapply(
             remote_url,
             \(x) {
-              if (is.null(x)) return(NULL)
+              if (is.null(x)) {
+                return(NULL)
+              }
               gsub(self$clean_url$full_url, "", x)
             }
           )
@@ -347,45 +415,47 @@ sftp_conn_generator <- R6::R6Class(
         # different commands depending on protocol and file/dir
         # detectable by trailing slash generated by .fix_url_type
         command <-
-          switch(
-            paste(
-              purpose,
-              tolower(self$protocol),
-              grepl("/$", remote_url$from),
-              sep = "_"
-            ),
-            "rm_sftp_TRUE"      = "rmdir",
-            "rm_sftp_FALSE"     = "rm",
-            "rm_ftp_TRUE"       = "RMD",
-            "rm_ftp_FALSE"      = "DELE",
-            "mkdir_sftp_TRUE"   = "mkdir",
-            "mkdir_sftp_FALSE"  = "mkdir",
-            "mkdir_ftp_TRUE"    = "MKD",
-            "mkdir_ftp_FALSE"   = "MKD",
-            "rename_sftp_TRUE"  = "rename",
-            "rename_sftp_FALSE" = "rename",
-            "rename_ftp_TRUE"   = "RNFR",
-            "rename_ftp_FALSE"  = "RNFR",
-            stop(
-              sprintf(
-                "Unsupported protocol or type for %s.",
-                switch(
-                  purpose,
-                  "rm"     = "deletion",
-                  "mkdir"  = "creating directory",
-                  "rename" = "renaming"
-                )
+          switch(paste(
+            purpose,
+            tolower(self$protocol),
+            grepl("/$", remote_url$from),
+            sep = "_"
+          ),
+          "rm_sftp_TRUE" = "rmdir",
+          "rm_sftp_FALSE" = "rm",
+          "rm_ftp_TRUE" = "RMD",
+          "rm_ftp_FALSE" = "DELE",
+          "mkdir_sftp_TRUE" = "mkdir",
+          "mkdir_sftp_FALSE" = "mkdir",
+          "mkdir_ftp_TRUE" = "MKD",
+          "mkdir_ftp_FALSE" = "MKD",
+          "rename_sftp_TRUE" = "rename",
+          "rename_sftp_FALSE" = "rename",
+          "rename_ftp_TRUE" = "RNFR",
+          "rename_ftp_FALSE" = "RNFR",
+          stop(
+            sprintf(
+              "Unsupported protocol or type for %s.",
+              switch(purpose,
+                "rm"     = "deletion",
+                "mkdir"  = "creating directory",
+                "rename" = "renaming"
               )
             )
           )
+          )
 
-        if (isFALSE(.return_error)) command <- paste0("*", command)
+        if (isTRUE(.ignore_error)) command <- paste0("*", command)
 
         # remote risky trailing slash
         relative_url <-
           lapply(
             relative_url,
-            \(x) if (is.null(x)) return(NULL) else gsub("/$", "", x)
+            \(x) if (is.null(x)) {
+              return(NULL)
+            } else {
+              gsub("/$", "", x)
+            }
           )
 
         # Function     Handle Intent     Quote Trailing (/)	Logic / Command
@@ -464,9 +534,6 @@ sftp_conn_generator <- R6::R6Class(
     #'
     #' @return Logical. \code{TRUE} if the resource exists and is accessible;
     #'   \code{FALSE} otherwise.
-    #'
-    #' @keywords internal
-    #' @noRd
     .exists =
       function(sftp_url = NULL) {
         if (is.null(sftp_url)) stop("`sftp_url` cannot be NULL")
@@ -506,9 +573,6 @@ sftp_conn_generator <- R6::R6Class(
     #'
     #' @note This method uses a 5-second \code{connecttimeout} to ensure
     #'   the probe doesn't hang on unresponsive servers.
-    #'
-    #' @keywords internal
-    #' @noRd
     .fix_url_type =
       function(remote_url) {
         # requesting the first byte of data (CURLOPT_RANGE 0-0)
@@ -533,7 +597,9 @@ sftp_conn_generator <- R6::R6Class(
             "try-error"
           )
 
-        if (isTRUE(accessible)) return(remote_url)
+        if (isTRUE(accessible)) {
+          return(remote_url)
+        }
 
         remote_url <-
           ifelse(
@@ -560,8 +626,8 @@ sftp_conn_generator <- R6::R6Class(
     }
   ),
   private = list(
-    user         = NA_character_,
-    password     = NA_character_,
+    user = NA_character_,
+    password = NA_character_,
     .base_handle =
       function(..., .verbose = self$.verbose) {
         h <- curl::new_handle()

@@ -9,7 +9,7 @@ sftp_mkdir(
   remote_url = NULL,
   .recursive = TRUE,
   .verbose = TRUE,
-  .return_error = !.recursive
+  .ignore_error = .recursive
 )
 }
 \arguments{
@@ -22,9 +22,7 @@ to create.}
 \item{.recursive}{Logical. If \code{TRUE}, creates missing parent
 directories. Defaults to \code{TRUE}.}
 
-\item{.verbose}{Logical. Defaults to `TRUE`. Prints helpful messages.}
-
-\item{.return_error}{Logical. If \code{FALSE}, the function uses the \code{*}
+\item{.ignore_error}{Logical. If \code{FALSE}, the function uses the \code{*}
 prefix in the curl quote command to ignore errors (e.g., if the directory
 already exists). Defaults to \code{!.recursive}.}
 }

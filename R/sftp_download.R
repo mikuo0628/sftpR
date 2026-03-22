@@ -3,9 +3,13 @@
 #' Downloads a file from a remote SFTP server to a local disk location
 #' or directly into R's memory as a raw vector.
 #'
+#' @inheritParams sftp_conn_generator
+#'
 #' @param sftp_conn An \code{SFTPConn} R6 object, created by
 #'   \code{\link{sftp_connect}}.
+#'
 #' @param remote_file Character. The path or URL of the file on the SFTP server.
+#'
 #' @param local_file Character or \code{NULL}.
 #'   \itemize{
 #'     \item If \code{character}: The local path where the file should be saved.
@@ -14,11 +18,13 @@
 #'     \item If \code{NULL}: The file is downloaded to memory and
 #'       returned as a \code{raw} vector.
 #'   }
+#'
 #' @param .create_dir Logical. If \code{TRUE}, creates the local destination
 #'   directory if it does not exist. Defaults to \code{FALSE}.
+#'
 #' @param .overwrite Logical. If \code{FALSE} (default), the function willthrow
 #'   an error if a local file already exists at the destination.
-#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+#'
 #' @param ... Additional arguments passed to \code{curl::curl_download}.
 #'
 #' @return If \code{local_file} is \code{NULL}, a \code{raw} vector of the file

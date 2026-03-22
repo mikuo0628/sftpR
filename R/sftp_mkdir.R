@@ -4,14 +4,18 @@
 #' It supports recursive directory creation, effectively behaving like
 #' \code{mkdir -p} on a Unix-like system.
 #'
+#' @inheritParams sftp_conn_generator
+#'
 #' @param sftp_conn An \code{SFTPConn} R6 object, created by
 #'   \code{\link{sftp_connect}}.
+#'
 #' @param remote_url Character. The relative or absolute path of the directory
 #'   to create.
+#'
 #' @param .recursive Logical. If \code{TRUE}, creates missing parent
 #'   directories. Defaults to \code{TRUE}.
-#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
-#' @param .return_error Logical. If \code{FALSE}, the function uses the \code{*}
+#'
+#' @param .ignore_error Logical. If \code{FALSE}, the function uses the \code{*}
 #'   prefix in the curl quote command to ignore errors (e.g., if the directory
 #'   already exists). Defaults to \code{!.recursive}.
 #'
@@ -37,7 +41,7 @@ sftp_mkdir <- function(
     remote_url = NULL,
     .recursive = TRUE,
     .verbose = TRUE,
-    .return_error = !.recursive) {
+    .ignore_error = .recursive) {
   # checks remote_url to ensure parts and spelling are consistent with sftp_conn
   remote_url <- .validate_sftp_url(sftp_conn, remote_url, .verbose)
 
@@ -48,7 +52,7 @@ sftp_mkdir <- function(
 
     for (segment in segments) {
       # Use the internal non-recursive logic via a recursive call
-      # Use .return_error = F to add asterisk (*) before "mkdir" command
+      # Use .ignore_error = T to add asterisk (*) before "mkdir" command
       # to ignore error; saves a `.exists` check
       current_url <- paste0(current_url, "/", segment)
       sftp_mkdir(
@@ -56,7 +60,7 @@ sftp_mkdir <- function(
         remote_url    = current_url,
         .recursive    = FALSE,
         .verbose      = .verbose,
-        .return_error = FALSE
+        .ignore_error = TRUE
       )
     }
   } else {
@@ -66,7 +70,7 @@ sftp_mkdir <- function(
         remote_url_from = remote_url,
         purpose = "mkdir",
         .verbose = .verbose,
-        .return_error = .return_error
+        .ignore_error = .ignore_error
       )
 
     resp <-

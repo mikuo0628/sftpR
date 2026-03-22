@@ -3,14 +3,18 @@
 #' Renames a file or directory on the SFTP server. This can also be used to
 #' move files between directories.
 #'
+#' @inheritParams sftp_conn_generator
+#'
 #' @param sftp_conn An \code{SFTPConn} R6 object,
 #'   created by \code{\link{sftp_connect}}.
+#'
 #' @param remote_url_from Character. The current path of the file or directory.
+#'
 #' @param remote_url_to Character. The new path for the file or directory.
+#'
 #' @param .recursive Logical. If \code{TRUE}, automatically creates any missing
 #'   parent directories in the destination path using \code{\link{sftp_mkdir}}.
 #'   Defaults to \code{FALSE}.
-#' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
 #'
 #' @return \code{invisible(TRUE)} on success.
 #'
@@ -67,7 +71,7 @@ sftp_rename <- function(
         ),
       .recursive = .recursive,
       .verbose = .verbose,
-      .return_error = FALSE
+      .ignore_error = TRUE
     )
   }
 

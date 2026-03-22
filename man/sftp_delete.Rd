@@ -23,8 +23,6 @@ be deleted.}
 all contents within a directory before deleting the directory itself.
 Defaults to \code{FALSE}.}
 
-\item{.verbose}{Logical. Defaults to `TRUE`. Prints helpful messages.}
-
 \item{.validate}{Logical. Whether to validate the \code{remote_url} against
 the connection object. Internally set to \code{FALSE} during recursive
 calls to improve performance.}
