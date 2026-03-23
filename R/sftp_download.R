@@ -3,7 +3,7 @@
 #' Downloads a file from a remote SFTP server to a local disk location
 #' or directly into R's memory as a raw vector.
 #'
-#' @inheritParams sftp_conn_generator
+#' @inheritParams sftp_connect
 #'
 #' @param sftp_conn An \code{SFTPConn} R6 object, created by
 #'   \code{\link{sftp_connect}}.

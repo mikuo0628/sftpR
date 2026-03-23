@@ -23,6 +23,9 @@ created by \code{\link{sftp_connect}}.}
 \item{.recursive}{Logical. If \code{TRUE}, automatically creates any missing
 parent directories in the destination path using \code{\link{sftp_mkdir}}.
 Defaults to \code{FALSE}.}
+
+\item{.verbose}{Logical. Defaults to \code{TRUE}.
+Prints helpful messages.}
 }
 \value{
 \code{invisible(TRUE)} on success.

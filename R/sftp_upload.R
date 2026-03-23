@@ -5,7 +5,7 @@
 #' server. It manages the libcurl handle lifecycle, ensures connections are
 #' closed, and validates URLs against the connection's "Source of Truth".
 #'
-#' @inheritParams sftp_conn_generator
+#' @inheritParams sftp_connect
 #'
 #' @param sftp_conn An \code{SFTPConn} R6 object, created by
 #'   \code{sftp_connect}.

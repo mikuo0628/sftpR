@@ -4,7 +4,7 @@
 #' is a directory, it must be empty unless \code{.recursive = TRUE}
 #' is specified.
 #'
-#' @inheritParams sftp_conn_generator
+#' @inheritParams sftp_connect
 #'
 #' @param sftp_conn An \code{SFTPConn} R6 object, created by
 #'   \code{\link{sftp_connect}}.

@@ -17,6 +17,26 @@ sftp_connect(
   .verbose = TRUE
 )
 }
+\arguments{
+\item{protocol}{Character. Protocol string. Defaults to "sftp".}
+
+\item{hostname}{Character. Server URL or IP. Defaults to "localhost".}
+
+\item{path}{Character. Sub-path on server.}
+
+\item{port}{Character. Port number. Defaults to "22".}
+
+\item{user}{Character. SFTP account name.}
+
+\item{password}{Character. SFTP password.}
+
+\item{timeout}{Integer. Connection timeout.}
+
+\item{...}{Additional arguments passed to \code{curl::handle_setopt()}.}
+
+\item{.verbose}{Logical. Defaults to \code{TRUE}.
+Prints helpful messages.}
+}
 \description{
 An R6 class to safely store information needed for SFTP connection,
 with convenient methods to check connections and existence of files or

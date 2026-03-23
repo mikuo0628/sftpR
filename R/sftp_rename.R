@@ -3,7 +3,7 @@
 #' Renames a file or directory on the SFTP server. This can also be used to
 #' move files between directories.
 #'
-#' @inheritParams sftp_conn_generator
+#' @inheritParams sftp_connect
 #'
 #' @param sftp_conn An \code{SFTPConn} R6 object,
 #'   created by \code{\link{sftp_connect}}.

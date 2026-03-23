@@ -1,16 +1,30 @@
-#' @include sftp_connect.R
-NULL
-
 #' Create an \code{SFTPConn} R6 object that contains important connection
 #' information safely.
 #'
 #' @inherit sftp_conn_generator description
 #'
+#' @param protocol Character. Protocol string. Defaults to "sftp".
+#'
+#' @param hostname Character. Server URL or IP. Defaults to "localhost".
+#'
+#' @param path Character. Sub-path on server.
+#'
+#' @param port Character. Port number. Defaults to "22".
+#'
+#' @param user Character. SFTP account name.
+#'
+#' @param password Character. SFTP password.
+#'
+#' @param timeout Integer. Connection timeout.
+#'
+#' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
+#'
+#' @param .verbose Logical. Defaults to \code{TRUE}.
+#'   Prints helpful messages.
+#'
 #' @inherit sftp_conn_generator details
 #'
 #' @inherit sftp_conn_generator return
-#'
-#' @inheritParams sftp_conn_generator
 #'
 #' @examples
 #' \dontrun{
@@ -112,7 +126,8 @@ sftp_conn_generator <- R6::R6Class(
     #'
     #' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
     #'
-    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+    #' @param .verbose Logical. Defaults to \code{TRUE}.
+    #'   Prints helpful messages.
     #'
     #' @return An `SFTPConn` object with safely stored user credential and
     #'  convenience methods for various operations, such as checking connection
@@ -227,7 +242,8 @@ sftp_conn_generator <- R6::R6Class(
     #'
     #' @param ... Additional options for \code{curl::handle_setopt()}.
     #'
-    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+    #' @param .verbose Logical. Defaults to \code{TRUE}.
+    #'   Prints helpful messages.
     .upload_handle =
       function(local_file, reuse = TRUE, .verbose = self$.verbose, ...) {
         # check if `local_file` exists
@@ -370,17 +386,18 @@ sftp_conn_generator <- R6::R6Class(
     #'      \item "rename": to rename
     #'   }
     #'
-    #' @param .verbose Logical. Defaults to `TRUE`. Prints helpful messages.
+    #' @param .verbose Logical. Defaults to \code{TRUE}.
+    #'   Prints helpful messages.
     #'
-    #' @param .ignore_error Logical. Defaults to `FALSE`. If `TRUE`, error will
-    #'   not interrupt subsequent execution. See [Details]{asterisk}.
+    #' @param .ignore_error Logical. Defaults to `FALSE`.
+    #'   If \code{TRUE}, error will not interrupt subsequent execution.
+    #'   See `Details`.
     #'
     #' @param ... Options that for \code{curl::handle_setopt()}.
     #'
     #' @details
-    #'   # Asterisk (`*`) usage with command {asterisk}
-    #'   In `curl`, adding an asterisk (`*`) at the very
-    #'   beginning of a command (ie. one of the 3 used in `purpose` argument)
+    #'   In `curl`, adding an asterisk (`*`) at the very  beginning of a
+    #'   command (ie. one of the 3 used in `purpose` argument)
     #'   acts as a "fail-safe" or "ignore-error" prefix. It silently ignores
     #'   any failure returned by the command, and continues without being
     #'   interrupted by the error.

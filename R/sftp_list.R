@@ -6,6 +6,8 @@
 #' algorithm to detect and skip circular symbolic links, preventing
 #' infinite recursion and stack overflow errors.
 #'
+#' @inheritParams sftp_connect
+#'
 #' @param sftp_conn A \code{SFTPConn} object containing connection details and
 #'   authentication. Created by \code{\link{sftp_connect}}.
 #'

@@ -22,6 +22,9 @@ to create.}
 \item{.recursive}{Logical. If \code{TRUE}, creates missing parent
 directories. Defaults to \code{TRUE}.}
 
+\item{.verbose}{Logical. Defaults to \code{TRUE}.
+Prints helpful messages.}
+
 \item{.ignore_error}{Logical. If \code{FALSE}, the function uses the \code{*}
 prefix in the curl quote command to ignore errors (e.g., if the directory
 already exists). Defaults to \code{!.recursive}.}

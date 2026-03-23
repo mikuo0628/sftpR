@@ -4,7 +4,7 @@
 #' It supports recursive directory creation, effectively behaving like
 #' \code{mkdir -p} on a Unix-like system.
 #'
-#' @inheritParams sftp_conn_generator
+#' @inheritParams sftp_connect
 #'
 #' @param sftp_conn An \code{SFTPConn} R6 object, created by
 #'   \code{\link{sftp_connect}}.

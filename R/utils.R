@@ -19,7 +19,7 @@
 #' disallowing absolute paths (indicated by double slashes) and performs
 #' basic sanitization.
 #'
-#' @inheritParams sftp_conn_generator
+#' @inheritParams sftp_connect
 #'
 #' @param url A character string containing the SFTP URL.
 #'
@@ -101,7 +101,7 @@
 #' if a port or path are found inside `hostname` they will
 #' override the corresponding arguments.
 #'
-#' @inheritParams sftp_conn_generator
+#' @inheritParams sftp_connect
 #'
 #' @param protocol single element vector of the protocol designation. Defaults
 #'   to `sftp://`.
@@ -225,7 +225,7 @@
 #' (double slashes), and corrects any incongruities in the protocol,
 #' hostname, or port.
 #'
-#' @inheritParams sftp_conn_generator
+#' @inheritParams sftp_connect
 #' @param sftp_conn An `R6` object of class `SFTPConn`.
 #'
 #' @param user_url

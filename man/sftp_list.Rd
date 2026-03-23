@@ -20,6 +20,9 @@ authentication. Created by \code{\link{sftp_connect}}.}
 the base URL in \code{SFTPConn} will be used: contents of the SFTP home
 folder will be listed.}
 
+\item{.verbose}{Logical. Defaults to \code{TRUE}.
+Prints helpful messages.}
+
 \item{.recursive}{Logical. If \code{TRUE}, recursively enters subdirectories
 to return a flattened tree of all remote objects. Defaults to \code{FALSE}.}
 
