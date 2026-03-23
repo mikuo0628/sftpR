@@ -28,13 +28,13 @@ LazyData: true
 SystemRequirements: libcurl: libcurl (with libssh2 support)
 Imports: 
     curl,
-    magrittr,
     R6
 RoxygenNote: 7.3.3
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3
 URL: https://mikuo0628.github.io/sftpR/
 VignetteBuilder: knitr
@@ -46,5 +46,4 @@ Collate:
     'sftp_mkdir.R'
     'sftp_rename.R'
     'sftp_upload.R'
-    'utils-pipe.R'
     'utils.R'
