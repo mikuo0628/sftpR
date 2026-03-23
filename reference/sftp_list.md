@@ -32,6 +32,10 @@ sftp_list(
   URL in `SFTPConn` will be used: contents of the SFTP home folder will
   be listed.
 
+- .verbose:
+
+  Logical. Defaults to `TRUE`. Prints helpful messages.
+
 - .recursive:
 
   Logical. If `TRUE`, recursively enters subdirectories to return a

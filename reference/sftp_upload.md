@@ -38,6 +38,10 @@ sftp_upload(
   Logical. If `TRUE`, recursively creates missing remote directories in
   the path (`CURLOPT_FTP_CREATE_MISSING_DIRS`).
 
+- .verbose:
+
+  Logical. Defaults to `TRUE`. Prints helpful messages.
+
 ## Value
 
 Returns `TRUE` (invisibly) on success. Throws an error on failure.

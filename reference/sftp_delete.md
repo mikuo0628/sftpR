@@ -34,6 +34,10 @@ sftp_delete(
   within a directory before deleting the directory itself. Defaults to
   `FALSE`.
 
+- .verbose:
+
+  Logical. Defaults to `TRUE`. Prints helpful messages.
+
 - .validate:
 
   Logical. Whether to validate the `remote_url` against the connection

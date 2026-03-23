@@ -32,6 +32,10 @@ sftp_mkdir(
   Logical. If `TRUE`, creates missing parent directories. Defaults to
   `TRUE`.
 
+- .verbose:
+
+  Logical. Defaults to `TRUE`. Prints helpful messages.
+
 - .ignore_error:
 
   Logical. If `FALSE`, the function uses the `*` prefix in the curl

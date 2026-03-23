@@ -50,6 +50,10 @@ sftp_download(
   Logical. If `FALSE` (default), the function willthrow an error if a
   local file already exists at the destination.
 
+- .verbose:
+
+  Logical. Defaults to `TRUE`. Prints helpful messages.
+
 - ...:
 
   Additional arguments passed to

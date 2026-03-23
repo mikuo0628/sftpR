@@ -37,6 +37,10 @@ sftp_rename(
   [`sftp_mkdir`](https://mikuo0628.github.io/sftpR/reference/sftp_mkdir.md).
   Defaults to `FALSE`.
 
+- .verbose:
+
+  Logical. Defaults to `TRUE`. Prints helpful messages.
+
 ## Value
 
 `invisible(TRUE)` on success.

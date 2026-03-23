@@ -21,6 +21,45 @@ sftp_connect(
 )
 ```
 
+## Arguments
+
+- protocol:
+
+  Character. Protocol string. Defaults to "sftp".
+
+- hostname:
+
+  Character. Server URL or IP. Defaults to "localhost".
+
+- path:
+
+  Character. Sub-path on server.
+
+- port:
+
+  Character. Port number. Defaults to "22".
+
+- user:
+
+  Character. SFTP account name.
+
+- password:
+
+  Character. SFTP password.
+
+- timeout:
+
+  Integer. Connection timeout.
+
+- ...:
+
+  Additional arguments passed to
+  [`curl::handle_setopt()`](https://jeroen.r-universe.dev/curl/reference/handle.html).
+
+- .verbose:
+
+  Logical. Defaults to `TRUE`. Prints helpful messages.
+
 ## Details
 
 One important goal of this designing choice is to keep user credentials
