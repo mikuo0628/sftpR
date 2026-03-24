@@ -50,7 +50,7 @@
 <li>
 <code>R/sftp_upload.R</code>, <code>R/sftp_list.R</code>, <code>R/sftp_download.R</code>, <code>R/sftp_delete.R</code>, <code>R/sftp_mkdir.R</code>, <code>R/sftp_rename.R</code>: exported helpers operating on an <code>SFTPConn</code> object.</li>
 <li>
-<code>R/utils.R</code>: URL parsing, building, and validation helpers: <code>.parse_sftp_url()</code>, <code>.build_sftp_url()</code>, <code>.validate_sftp_url()</code>, <code>.sftp_parse()</code>.</li>
+<code>R/utils.R</code>: URL parsing, building, and validation helpers: <code><a href="reference/dot-parse_sftp_url.html">.parse_sftp_url()</a></code>, <code><a href="reference/dot-build_sftp_url.html">.build_sftp_url()</a></code>, <code><a href="reference/dot-validate_sftp_url.html">.validate_sftp_url()</a></code>, <code><a href="reference/dot-sftp_parse.html">.sftp_parse()</a></code>.</li>
 </ul><p>Note: this package requires system <code>libcurl</code> with SFTP support. The code checks <code>"sftp" %in% curl::curl_version()$protocol</code> during connection initialization.</p>
 </div>
 <div class="section level2">
@@ -68,22 +68,22 @@
 <h3 id="sftp_connectprotocol--sftp-hostname-path--null-port--22l-user--na_character_-password--na_character_-timeout--30l--verbose--true"><code>sftp_connect(protocol = "sftp", hostname, path = NULL, port = 22L, user = NA_character_, password = NA_character_, timeout = 30L, ..., .verbose = TRUE)</code><a class="anchor" aria-label="anchor" href="#sftp_connectprotocol--sftp-hostname-path--null-port--22l-user--na_character_-password--na_character_-timeout--30l--verbose--true"></a></h3>
 <ul><li>Returns: an <code>SFTPConn</code> R6 object.</li>
 <li>Curl options (via <code>private$.base_handle</code>): <code>userpwd = "user:password"</code>, <code>ssh_auth_types = 2</code>, <code>verbose = .verbose</code>, <code>timeout = &lt;timeout&gt;</code>. Additional <code>...</code> arguments are forwarded to <code><a href="https://jeroen.r-universe.dev/curl/reference/handle.html" class="external-link">curl::handle_setopt()</a></code> (e.g., <code>connecttimeout</code>, <code>nobody</code>, <code>range</code>).</li>
-<li>URL expectation: <code>hostname</code> may include protocol, user, port, or path — <code>.build_sftp_url()</code> normalizes into the connection’s <code>clean_url</code>. Downstream operations normally use relative paths against <code>sftp_conn$clean_url$full_url</code>.</li>
+<li>URL expectation: <code>hostname</code> may include protocol, user, port, or path — <code><a href="reference/dot-build_sftp_url.html">.build_sftp_url()</a></code> normalizes into the connection’s <code>clean_url</code>. Downstream operations normally use relative paths against <code>sftp_conn$clean_url$full_url</code>.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="sftp_uploadsftp_conn-local_file-remote_file--null-create_dir--false-verbose--true"><code>sftp_upload(sftp_conn, local_file, remote_file = NULL, .create_dir = FALSE, .verbose = TRUE)</code><a class="anchor" aria-label="anchor" href="#sftp_uploadsftp_conn-local_file-remote_file--null-create_dir--false-verbose--true"></a></h3>
 <ul><li>Purpose: upload local files or <code>data.frame</code> objects.</li>
 <li>Curl options (configured by <code>SFTPConn$.upload_handle</code>): <code>upload = TRUE</code>, streaming <code>readfunction</code>/<code>seekfunction</code>, <code>forbid_reuse</code> (depending on <code>reuse</code>), <code>infilesize_large</code> when size known. When <code>.create_dir = TRUE</code>, <code>ftp_create_missing_dirs = 1L</code> may be set.</li>
 <li>Execution: performs <code>curl::curl_fetch_memory(remote_full_url, handle = upload_handle$h)</code>.</li>
-<li>URL expectation: relative remote paths are recommended; <code>.validate_sftp_url()</code> will expand relative paths into absolute <code>full_url</code> anchored at <code>sftp_conn$clean_url</code>. Absolute URLs are accepted but are normalized and verified.</li>
+<li>URL expectation: relative remote paths are recommended; <code><a href="reference/dot-validate_sftp_url.html">.validate_sftp_url()</a></code> will expand relative paths into absolute <code>full_url</code> anchored at <code>sftp_conn$clean_url</code>. Absolute URLs are accepted but are normalized and verified.</li>
 <li>Return: <code>invisible(TRUE)</code> on success; throws on error.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="sftp_listsftp_conn-sftp_url--null-verbose--true-recursive--false-check--recursive"><code>sftp_list(sftp_conn, sftp_url = NULL, .verbose = TRUE, .recursive = FALSE, .check = .recursive)</code><a class="anchor" aria-label="anchor" href="#sftp_listsftp_conn-sftp_url--null-verbose--true-recursive--false-check--recursive"></a></h3>
 <ul><li>Purpose: list directory contents; <code>.recursive = TRUE</code> crawls subdirectories.</li>
 <li>Curl options: uses <code>sftp_conn$h</code> (from <code>.base_handle()</code>). <code>.fix_url_type()</code> uses a small probe (<code>range = "0-0"</code> and short <code>connecttimeout</code>) to determine file vs directory and adjust trailing slash.</li>
-<li>Execution: <code>curl::curl_fetch_memory(sftp_url, sftp_conn$h)</code> then parse via <code>.sftp_parse()</code>.</li>
-<li>URL expectation: if <code>sftp_url</code> is <code>NULL</code> uses <code>sftp_conn$clean_url$full_url</code>. When providing a path, relative paths are allowed and validated via <code>.validate_sftp_url()</code>; directories should have trailing slash — <code>.fix_url_type()</code> will attempt to adjust.</li>
+<li>Execution: <code>curl::curl_fetch_memory(sftp_url, sftp_conn$h)</code> then parse via <code><a href="reference/dot-sftp_parse.html">.sftp_parse()</a></code>.</li>
+<li>URL expectation: if <code>sftp_url</code> is <code>NULL</code> uses <code>sftp_conn$clean_url$full_url</code>. When providing a path, relative paths are allowed and validated via <code><a href="reference/dot-validate_sftp_url.html">.validate_sftp_url()</a></code>; directories should have trailing slash — <code>.fix_url_type()</code> will attempt to adjust.</li>
 <li>Return: <code>data.frame</code> of parsed <code>ls -l</code> output, or <code>NULL</code> if empty.</li>
 </ul></div>
 <div class="section level3">
@@ -91,7 +91,7 @@
 <ul><li>Purpose: download a remote file to disk or memory.</li>
 <li>Curl usage: calls <code>curl::curl_download(url, destfile, handle = sftp_conn$h, ...)</code> for file downloads or <code>curl::curl_fetch_memory(url, handle = sftp_conn$h)</code> for in-memory retrieval.</li>
 <li>Local path behavior: treats <code>local_file = NULL</code> -&gt; memory (return <code>raw</code>), <code>local_file</code> missing/empty -&gt; save to working directory, otherwise intelligently decide whether <code>local_file</code> is directory or file.</li>
-<li>URL expectation: accepts relative paths (validated by <code>.validate_sftp_url()</code>) or absolute full URLs.</li>
+<li>URL expectation: accepts relative paths (validated by <code><a href="reference/dot-validate_sftp_url.html">.validate_sftp_url()</a></code>) or absolute full URLs.</li>
 <li>Status: contains implementation TODOs (bulk-download mapping, clearer error handling). See TODOs below.</li>
 <li>Return: <code>invisible(destfile)</code> for file downloads or raw vector for memory downloads.</li>
 </ul></div>
@@ -99,14 +99,14 @@
 <h3 id="sftp_deletesftp_conn-remote_url-verbose--true"><code>sftp_delete(sftp_conn, remote_url, .verbose = TRUE)</code><a class="anchor" aria-label="anchor" href="#sftp_deletesftp_conn-remote_url-verbose--true"></a></h3>
 <ul><li>Purpose: delete a remote file or empty directory.</li>
 <li>Curl usage: builds a command-like handle from <code>sftp_conn$.quote_handle(..., purpose = "rm")</code> which sets <code>quote</code> and uses credentials from <code>.base_handle()</code>. The command is executed with <code>curl::curl_fetch_memory(sftp_conn$clean_url$full_url, handle = h)</code>.</li>
-<li>URL expectation: callers provide relative paths (recommended); <code>.validate_sftp_url()</code> normalizes them. <code>.quote_handle</code> strips the base URL and uses a relative POSIX path in the server-side command.</li>
+<li>URL expectation: callers provide relative paths (recommended); <code><a href="reference/dot-validate_sftp_url.html">.validate_sftp_url()</a></code> normalizes them. <code>.quote_handle</code> strips the base URL and uses a relative POSIX path in the server-side command.</li>
 <li>Return: <code>invisible(TRUE)</code> on success; throws on failure.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="sftp_mkdirsftp_conn-remote_url-recursive--true-verbose--true-ignore_error--recursive"><code>sftp_mkdir(sftp_conn, remote_url, .recursive = TRUE, .verbose = TRUE, .ignore_error = !.recursive)</code><a class="anchor" aria-label="anchor" href="#sftp_mkdirsftp_conn-remote_url-recursive--true-verbose--true-ignore_error--recursive"></a></h3>
 <ul><li>Purpose: create a remote directory (optionally recursive).</li>
 <li>Curl usage: uses <code>sftp_conn$.quote_handle(..., purpose = "mkdir")</code>. When <code>.recursive = TRUE</code>, <code>ftp_create_missing_dirs</code> logic may be used for multi-level creation, and internal calls may set an <code>*</code> prefix to ignore errors for existing directories.</li>
-<li>URL expectation: relative paths recommended; normalized via <code>.validate_sftp_url()</code>.</li>
+<li>URL expectation: relative paths recommended; normalized via <code><a href="reference/dot-validate_sftp_url.html">.validate_sftp_url()</a></code>.</li>
 <li>Return: <code>invisible(TRUE)</code> on success.</li>
 </ul></div>
 <div class="section level3">
@@ -114,7 +114,7 @@
 <ul><li>Purpose: rename or move remote resources.</li>
 <li>Curl usage: constructs a rename command via <code>.quote_handle(..., purpose = "rename")</code> and executes it with <code>curl::curl_fetch_memory(sftp_conn$clean_url$full_url, handle = h)</code>.</li>
 <li>Behavior: if <code>.recursive = TRUE</code>, ensures destination parent exists by calling <code><a href="reference/sftp_mkdir.html">sftp_mkdir()</a></code>.</li>
-<li>URL expectation: relative paths recommended; arguments are validated via <code>.validate_sftp_url()</code>.</li>
+<li>URL expectation: relative paths recommended; arguments are validated via <code><a href="reference/dot-validate_sftp_url.html">.validate_sftp_url()</a></code>.</li>
 <li>Return: <code>invisible(TRUE)</code> on success.</li>
 </ul></div>
 </div>
@@ -132,7 +132,7 @@
 <div class="section level2">
 <h2 id="tests--expectations">Tests &amp; expectations<a class="anchor" aria-label="anchor" href="#tests--expectations"></a></h2>
 <ul><li>
-<code>tests/testthat/</code> contains unit tests for <code>.build_sftp_url()</code>, <code>.parse_sftp_url()</code>, <code>.validate_sftp_url()</code>, <code>SFTPConn</code> creation, and an integration-like workflow (upload/list/delete/mkdir/rename).</li>
+<code>tests/testthat/</code> contains unit tests for <code><a href="reference/dot-build_sftp_url.html">.build_sftp_url()</a></code>, <code><a href="reference/dot-parse_sftp_url.html">.parse_sftp_url()</a></code>, <code><a href="reference/dot-validate_sftp_url.html">.validate_sftp_url()</a></code>, <code>SFTPConn</code> creation, and an integration-like workflow (upload/list/delete/mkdir/rename).</li>
 <li>Tests assert specific warnings when parsed hostname components overwrite function args (e.g., warning when <code>hostname</code> includes <code>:2222</code> and <code>port</code> is also passed).</li>
 </ul></div>
 <div class="section level2">

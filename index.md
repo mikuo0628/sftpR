@@ -1,17 +1,16 @@
-# sftpR
+# [sftpR](https://mikuo0628.github.io/sftpR/)
 
-Robust SFTP tool kit for R, built on top of the
-[`curl`](https://cran.r-project.org/web/packages/curl/index.html)
-package.
+Robust SFTP tool kit for R, built on top of
+[`curl`](https://cran.r-project.org/web/packages/curl/index.html).
 
 This package is inspired by [`sftp`](https://github.com/stenevang/sftp),
 with modernized updates that shifts from the legacy
-[‘RCurl’](https://cran.r-project.org/web/packages/RCurl/index.html) to
+[`RCurl`](https://cran.r-project.org/web/packages/RCurl/index.html) to
 the more secure
 [`curl`](https://cran.r-project.org/web/packages/curl/index.html) that
-is still [maintained](https://jeroen.r-universe.dev/curl), a more robust
-handling of inputs and paths, and more secure management of user
-credentials.
+is still [issue-tracked and
+maintained](https://jeroen.r-universe.dev/curl), a more robust handling
+of inputs and paths, and more secure management of user credentials.
 
 `sftpR` leverages an R6 class for connection that safely stores user
 credential and a reusable `curl` handle for generic SFTP operations such

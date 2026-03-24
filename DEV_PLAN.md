@@ -26,8 +26,10 @@ Regenerate docs: `Rscript -e "devtools::document()"` - Build:
   `R/sftp_delete.R`, `R/sftp_mkdir.R`, `R/sftp_rename.R`: exported
   helpers operating on an `SFTPConn` object.
 - `R/utils.R`: URL parsing, building, and validation helpers:
-  `.parse_sftp_url()`, `.build_sftp_url()`, `.validate_sftp_url()`,
-  `.sftp_parse()`.
+  [`.parse_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-parse_sftp_url.md),
+  [`.build_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-build_sftp_url.md),
+  [`.validate_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-validate_sftp_url.md),
+  [`.sftp_parse()`](https://mikuo0628.github.io/sftpR/reference/dot-sftp_parse.md).
 
 Note: this package requires system `libcurl` with SFTP support. The code
 checks `"sftp" %in% curl::curl_version()$protocol` during connection
@@ -78,9 +80,10 @@ remote URLs.
   [`curl::handle_setopt()`](https://jeroen.r-universe.dev/curl/reference/handle.html)
   (e.g., `connecttimeout`, `nobody`, `range`).
 - URL expectation: `hostname` may include protocol, user, port, or path
-  — `.build_sftp_url()` normalizes into the connection’s `clean_url`.
-  Downstream operations normally use relative paths against
-  `sftp_conn$clean_url$full_url`.
+  —
+  [`.build_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-build_sftp_url.md)
+  normalizes into the connection’s `clean_url`. Downstream operations
+  normally use relative paths against `sftp_conn$clean_url$full_url`.
 
 ### `sftp_upload(sftp_conn, local_file, remote_file = NULL, .create_dir = FALSE, .verbose = TRUE)`
 
@@ -93,9 +96,10 @@ remote URLs.
 - Execution: performs
   `curl::curl_fetch_memory(remote_full_url, handle = upload_handle$h)`.
 - URL expectation: relative remote paths are recommended;
-  `.validate_sftp_url()` will expand relative paths into absolute
-  `full_url` anchored at `sftp_conn$clean_url`. Absolute URLs are
-  accepted but are normalized and verified.
+  [`.validate_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-validate_sftp_url.md)
+  will expand relative paths into absolute `full_url` anchored at
+  `sftp_conn$clean_url`. Absolute URLs are accepted but are normalized
+  and verified.
 - Return: `invisible(TRUE)` on success; throws on error.
 
 ### `sftp_list(sftp_conn, sftp_url = NULL, .verbose = TRUE, .recursive = FALSE, .check = .recursive)`
@@ -107,11 +111,14 @@ remote URLs.
   `connecttimeout`) to determine file vs directory and adjust trailing
   slash.
 - Execution: `curl::curl_fetch_memory(sftp_url, sftp_conn$h)` then parse
-  via `.sftp_parse()`.
+  via
+  [`.sftp_parse()`](https://mikuo0628.github.io/sftpR/reference/dot-sftp_parse.md).
 - URL expectation: if `sftp_url` is `NULL` uses
   `sftp_conn$clean_url$full_url`. When providing a path, relative paths
-  are allowed and validated via `.validate_sftp_url()`; directories
-  should have trailing slash — `.fix_url_type()` will attempt to adjust.
+  are allowed and validated via
+  [`.validate_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-validate_sftp_url.md);
+  directories should have trailing slash — `.fix_url_type()` will
+  attempt to adjust.
 - Return: `data.frame` of parsed `ls -l` output, or `NULL` if empty.
 
 ### `sftp_download(sftp_conn, remote_file, local_file = NA_character_, .create_dir = FALSE, .overwrite = FALSE, .verbose = TRUE, ...)`
@@ -126,7 +133,8 @@ remote URLs.
   otherwise intelligently decide whether `local_file` is directory or
   file.
 - URL expectation: accepts relative paths (validated by
-  `.validate_sftp_url()`) or absolute full URLs.
+  [`.validate_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-validate_sftp_url.md))
+  or absolute full URLs.
 - Status: contains implementation TODOs (bulk-download mapping, clearer
   error handling). See TODOs below.
 - Return: `invisible(destfile)` for file downloads or raw vector for
@@ -140,8 +148,9 @@ remote URLs.
   uses credentials from `.base_handle()`. The command is executed with
   `curl::curl_fetch_memory(sftp_conn$clean_url$full_url, handle = h)`.
 - URL expectation: callers provide relative paths (recommended);
-  `.validate_sftp_url()` normalizes them. `.quote_handle` strips the
-  base URL and uses a relative POSIX path in the server-side command.
+  [`.validate_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-validate_sftp_url.md)
+  normalizes them. `.quote_handle` strips the base URL and uses a
+  relative POSIX path in the server-side command.
 - Return: `invisible(TRUE)` on success; throws on failure.
 
 ### `sftp_mkdir(sftp_conn, remote_url, .recursive = TRUE, .verbose = TRUE, .ignore_error = !.recursive)`
@@ -152,7 +161,7 @@ remote URLs.
   for multi-level creation, and internal calls may set an `*` prefix to
   ignore errors for existing directories.
 - URL expectation: relative paths recommended; normalized via
-  `.validate_sftp_url()`.
+  [`.validate_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-validate_sftp_url.md).
 - Return: `invisible(TRUE)` on success.
 
 ### `sftp_rename(sftp_conn, remote_url_from, remote_url_to, .recursive = FALSE, .verbose = TRUE)`
@@ -165,7 +174,8 @@ remote URLs.
   calling
   [`sftp_mkdir()`](https://mikuo0628.github.io/sftpR/reference/sftp_mkdir.md).
 - URL expectation: relative paths recommended; arguments are validated
-  via `.validate_sftp_url()`.
+  via
+  [`.validate_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-validate_sftp_url.md).
 - Return: `invisible(TRUE)` on success.
 
 ## Internal helpers
@@ -182,9 +192,12 @@ remote URLs.
 
 ## Tests & expectations
 
-- `tests/testthat/` contains unit tests for `.build_sftp_url()`,
-  `.parse_sftp_url()`, `.validate_sftp_url()`, `SFTPConn` creation, and
-  an integration-like workflow (upload/list/delete/mkdir/rename).
+- `tests/testthat/` contains unit tests for
+  [`.build_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-build_sftp_url.md),
+  [`.parse_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-parse_sftp_url.md),
+  [`.validate_sftp_url()`](https://mikuo0628.github.io/sftpR/reference/dot-validate_sftp_url.md),
+  `SFTPConn` creation, and an integration-like workflow
+  (upload/list/delete/mkdir/rename).
 - Tests assert specific warnings when parsed hostname components
   overwrite function args (e.g., warning when `hostname` includes
   `:2222` and `port` is also passed).
