@@ -1,5 +1,4 @@
 #' @keywords internal
-#'
 #' @noRd
 .verbose_msg <- function(.verbose = FALSE, msg = "", type = message) {
   if (!isTRUE(.verbose)) return(invisible(NULL))
@@ -36,8 +35,6 @@
 #' by checking if the captured path starts with a forward slash.
 #'
 #' @keywords internal
-#'
-#' @noRd
 .parse_sftp_url <- function(url, .verbose = TRUE) {
   pattern <-
     paste0(
@@ -103,30 +100,9 @@
 #'
 #' @inheritParams sftp_connect
 #'
-#' @param protocol single element vector of the protocol designation. Defaults
-#'   to `sftp://`.
-#'
-#' @param hostname single element character vector of hostname URL or IP
-#'   address. The function will sanitize `hostname` of minor formatting issues,
-#'   such as extra slashes. If a port is included in the `hostname`, it will
-#'   override the `port` argument. If a path is included in the
-#'   `hostname`, it will override the `path` argument.
-#'
-#' @param port single element integer vector. Defaults to `22`. Will be
-#'   overwritten if a port is present in `hostname`.
-#'
-#' @param path single element character vector of the path/sub-path. Can
-#'   be multiple sub levels, e.g. `dir_1/dir_2/dir_3`. Case-sensitive.
-#'   Defaults to `NULL`, which directs to the root directory The function will
-#'   sanitize `path` of minor formatting issues, such as extra slashes, and
-#'   ensure a trailing slash if not NULL.
-#'
-#'
 #' @return A list with components: full_url, protocol, hostname, port, path.
 #'
 #' @keywords internal
-#'
-#' @noRd
 .build_sftp_url <- function(
     protocol = "sftp",
     user = NULL,
@@ -248,8 +224,6 @@
 #' @return A sanitized character string containing the validated SFTP URL.
 #'
 #' @keywords internal
-#'
-#' @noRd
 .validate_sftp_url <- function(
     sftp_conn,
     user_url,

@@ -148,7 +148,6 @@ sftp_list <- function(
 #' \code{"."} and \code{".."}. It determines object types based on the first
 #' character of the permission string (e.g., 'd' for directory).
 #' @keywords internal
-#' @noRd
 .sftp_parse <- function(resp = NULL, sftp_url = NULL, h = NULL) {
   if (is.null(resp)) {
     if (is.null(sftp_url)) stop("Must supply either `resp` or `sftp_url`")

@@ -9,7 +9,7 @@ sftp_connect(
   protocol = "sftp",
   hostname = "localhost",
   path = NULL,
-  port = 22L,
+  port = "22",
   user = NA_character_,
   password = NA_character_,
   timeout = 30L,
@@ -40,8 +40,8 @@ Prints helpful messages.}
 \description{
 An R6 class to safely store information needed for SFTP connection,
 with convenient methods to check connections and existence of files or
-directories, and create specific handles that are used in `sftp_*` functions
-for CRUD operations.
+directories, and create specific handles that are used in \code{`sftp_*`}
+functions for CRUD operations.
 }
 \details{
 One important goal of this designing choice is to keep user credentials
