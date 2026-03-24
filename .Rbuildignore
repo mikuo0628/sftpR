@@ -16,3 +16,4 @@
 ^pkgdown$
 ^\.github$
 .Rprofile
+^codecov\.yml$
