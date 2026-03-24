@@ -19,25 +19,22 @@ knitr::opts_chunk$set(
 [![R-CMD-check](https://github.com/mikuo0628/sftpR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mikuo0628/sftpR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-Robust SFTP tooling for R built on top of the
-[`curl`](https://cran.r-project.org/web/packages/curl/index.html) package. 
+Robust SFTP tool kit for R, built on top of the [`curl`][cran_curl] package. 
 
-This package is inspired by [`sftp`](https://github.com/stenevang/sftp), with
-updates to a more robust handling of inputs and paths, secure management of user
-credentials, and modern backend.
+This package is inspired by [`sftp`][stenevang_sftp], with modernized updates
+that shifts from the legacy ['RCurl'][cran_rcurl] to the more secure 
+[`curl`][cran_curl] that is still [maintained][jeroen_curl], a
+more robust handling of inputs and paths, and more secure management of user
+credentials.
 
-It provides an R6-based connection object that maintains user credential
-safely and a reusable `curl` handle, with public methods for safe printing and
-connection checking, and creating private purpose-specific
-handles (upload, rename, mkdir, etc).
-
-It also comes with the typical core CRUD functions to perform common
-SFTP operations, while reusing a single `curl` handle when appropriate.
-
+`sftpR` leverages an R6 class for connection that safely stores user credential
+and a reusable `curl` handle for generic SFTP operations such as download and 
+listing directories, and interal methods to create purpose-driven handles
+for more specific SFTP operations (upload, delete, rename, etc).
 
 ## Installation
 
-You can install the development version of sftpR from [GitHub](https://github.com/) with:
+You can install the development version of `sftpR` here:
 
 ``` r
 # install.packages("devtools")
@@ -84,3 +81,9 @@ sftp_rename(sftp_conn, "upload/file.txt", "upload/archive/file.backup")
 
 - Please open issues or pull requests. Follow the existing code stles and
   update/include tests for behavioural changes.
+
+[libcurl]:        https://curl.se/libcurl/
+[stenevang_sftp]: https://github.com/stenevang/sftp
+[cran_curl]:      https://cran.r-project.org/web/packages/curl/index.html
+[jeroen_curl]:    https://jeroen.r-universe.dev/curl
+[cran_rcurl]:     https://cran.r-project.org/web/packages/RCurl/index.html
