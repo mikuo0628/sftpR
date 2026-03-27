@@ -1,23 +1,17 @@
-#' Create Remote Directories via SFTP
+#' Create Remote Directories in SFTP
 #'
 #' This function creates directories on a remote server using the SFTP protocol.
 #' It supports recursive directory creation, effectively behaving like
 #' \code{mkdir -p} on a Unix-like system.
 #'
-#' @inheritParams sftp_connect
+#' @inheritParams shared_params
 #'
-#' @param sftp_conn An \code{SFTPConn} R6 object, created by
-#'   \code{\link{sftp_connect}}.
-#'
-#' @param remote_url Character. The relative or absolute path of the directory
-#'   to create.
-#'
-#' @param .recursive Logical. If \code{TRUE}, creates missing parent
-#'   directories. Defaults to \code{TRUE}.
-#'
-#' @param .ignore_error Logical. If \code{FALSE}, the function uses the \code{*}
+#' @param .ignore_error Logical. If \code{TRUE}, the function uses the \code{*}
 #'   prefix in the curl quote command to ignore errors (e.g., if the directory
-#'   already exists). Defaults to \code{!.recursive}.
+#'   already exists). This is useful in \code{.recursive = TRUE} because
+#'   attempting to create a directory that already exists will return error.
+#'   While this can be avoided by checking for directory existence, doing so
+#'   adds extra step that impacts performance.
 #'
 #' @return \code{invisible(TRUE)} on success.
 #'

@@ -7,9 +7,11 @@
 .validate_sftp_url(sftp_conn, user_url, .verbose = sftp_conn$.verbose)
 }
 \arguments{
-\item{sftp_conn}{An `R6` object of class `SFTPConn`.}
+\item{sftp_conn}{An \code{SFTPConn} object containing connection details and
+authentication. Created by \code{\link{sftp_connect()}}.}
 
-\item{user_url}{Character string. The destination SFTP URL or path provided by the user.}
+\item{user_url}{Character string. The destination SFTP URL or
+path provided by the user.}
 
 \item{.verbose}{Logical. Defaults to \code{TRUE}.
 Prints helpful messages.}
@@ -19,10 +21,10 @@ A sanitized character string containing the validated SFTP URL.
 }
 \description{
 This internal utility ensures that a user-provided URL matches the
-"Source of Truth" defined in an [SFTPConn] object. It prevents common
-formatting errors, warns against security-risky root access attempts
-(double slashes), and corrects any incongruities in the protocol,
-hostname, or port.
+"Source of Truth" defined in an \code{SFTPConn} object.
+It prevents common formatting errors, warns against security-risky
+root access attempts (double slashes), and corrects any incongruities
+in the protocol, hostname, or port.
 }
 \details{
 The function performs the following steps:

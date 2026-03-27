@@ -98,7 +98,7 @@
 #' if a port or path are found inside `hostname` they will
 #' override the corresponding arguments.
 #'
-#' @inheritParams sftp_connect
+#' @inheritParams shared_params
 #'
 #' @return A list with components: full_url, protocol, hostname, port, path.
 #'
@@ -196,17 +196,15 @@
 #' Validate and Sanitize SFTP URLs against a Connection Object
 #'
 #' This internal utility ensures that a user-provided URL matches the
-#' "Source of Truth" defined in an [SFTPConn] object. It prevents common
-#' formatting errors, warns against security-risky root access attempts
-#' (double slashes), and corrects any incongruities in the protocol,
-#' hostname, or port.
+#' "Source of Truth" defined in an \code{SFTPConn} object.
+#' It prevents common formatting errors, warns against security-risky
+#' root access attempts (double slashes), and corrects any incongruities
+#' in the protocol, hostname, or port.
 #'
-#' @inheritParams sftp_connect
-#' @param sftp_conn An `R6` object of class `SFTPConn`.
+#' @inheritParams shared_params
 #'
-#' @param user_url
-#'   Character string. The destination SFTP URL or path provided by the user.
-#'
+#' @param user_url Character string. The destination SFTP URL or
+#'   path provided by the user.
 #'
 #' @details
 #' The function performs the following steps:

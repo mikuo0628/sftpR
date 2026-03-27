@@ -3,7 +3,7 @@
 \name{sftp_connect}
 \alias{sftp_connect}
 \title{Create an \code{SFTPConn} R6 object that contains important connection
-information safely.}
+information safely}
 \usage{
 sftp_connect(
   protocol = "sftp",
@@ -37,18 +37,22 @@ sftp_connect(
 \item{.verbose}{Logical. Defaults to \code{TRUE}.
 Prints helpful messages.}
 }
+\value{
+\code{SFTPConn} R6 class object, used in \code{sftp_*} family.
+}
 \description{
 An R6 class to safely store information needed for SFTP connection,
 with convenient methods to check connections and existence of files or
-directories, and create specific handles that are used in \code{sftp_*}
-functions for CRUD operations.
+directories, and create specific handles for \code{sftp_*} function family of
+CRUD operations.
 }
 \details{
-One important goal of this designing choice is to keep user credentials
-safe, as private fields. They are used downstream to create necessary
-handles for specific SFTP operations, and users do not need to reenter them.
-This class has a safe printing method for some basic information, and to
-ensure credential is valid for connection.
+One important goal of this design choice is to keep user credentials
+safe, as private fields. Credentails are used to create specific handles
+for \code{sftp_*} family, and are reused where approrpiate. \code{SFTPConn}
+This class checks if credential is valid, and has a internal convenience
+methods such as safe printing for basic information, checking destination
+existence, and ensuring URL is correctly formatted.
 }
 \examples{
 \dontrun{

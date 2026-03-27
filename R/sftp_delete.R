@@ -4,21 +4,16 @@
 #' is a directory, it must be empty unless \code{.recursive = TRUE}
 #' is specified.
 #'
-#' @inheritParams sftp_connect
+#' @inheritParams shared_params
 #'
-#' @param sftp_conn An \code{SFTPConn} R6 object, created by
-#'   \code{\link{sftp_connect}}.
-#'
-#' @param remote_url Character. The full URL or path of the file or directory to
-#'   be deleted.
-#'
-#' @param .recursive Logical. If \code{TRUE}, will recursively list and delete
-#'   all contents within a directory before deleting the directory itself.
-#'   Defaults to \code{FALSE}.
-#'
-#' @param .validate Logical. Whether to validate the \code{remote_url} against
-#'   the connection object. Internally set to \code{FALSE} during recursive
-#'   calls to improve performance.
+#' @param .validate Logical. Whether to validate the \code{remote_url}
+#'   against the connection object. Defaults to \code{TRUE}, which will parse
+#'   \code{remote_url}, comapre to that of \code{SFTPConn}, and replaces parts
+#'   incongruent with \code{SFTPConn}.
+#'   Internally set to \code{FALSE} when \code{.recursive = TRUE} because
+#'   the URLs produced by the listing operation aren't subjected to human
+#'   errors, thus do not need further validation. This provides a minor
+#'   performance boost.
 #'
 #' @return \code{TRUE} (invisibly) if the operation was successful.
 #'

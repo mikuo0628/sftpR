@@ -13,22 +13,32 @@ sftp_delete(
 )
 }
 \arguments{
-\item{sftp_conn}{An \code{SFTPConn} R6 object, created by
-\code{\link{sftp_connect}}.}
+\item{sftp_conn}{An \code{SFTPConn} object containing connection details and
+authentication. Created by \code{\link{sftp_connect()}}.}
 
 \item{remote_url}{Character. The full URL or path of the file or directory to
-be deleted.}
+be operated on.}
 
-\item{.recursive}{Logical. If \code{TRUE}, will recursively list and delete
-all contents within a directory before deleting the directory itself.
-Defaults to \code{FALSE}.}
+\item{.recursive}{Logical. Defaults to \code{FALSE}. If \code{TRUE},
+will recursively perform the SFTP operation:
+\itemize{
+  \item \code{sftp_delete()}: deletes the directory and everything within.
+  \item \code{sftp_list()}: lists all the directories and files.
+  \item \code{sftp_mkdir()}: creates all the missing parent directories.
+  \item \code{sftp_rename()}: see \code{sftp_mkdir()}.
+}}
 
 \item{.verbose}{Logical. Defaults to \code{TRUE}.
 Prints helpful messages.}
 
-\item{.validate}{Logical. Whether to validate the \code{remote_url} against
-the connection object. Internally set to \code{FALSE} during recursive
-calls to improve performance.}
+\item{.validate}{Logical. Whether to validate the \code{remote_url}
+against the connection object. Defaults to \code{TRUE}, which will parse
+\code{remote_url}, comapre to that of \code{SFTPConn}, and replaces parts
+incongruent with \code{SFTPConn}.
+Internally set to \code{FALSE} when \code{.recursive = TRUE} because
+the URLs produced by the listing operation aren't subjected to human
+errors, thus do not need further validation. This provides a minor
+performance boost.}
 }
 \value{
 \code{TRUE} (invisibly) if the operation was successful.

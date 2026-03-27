@@ -2,7 +2,7 @@
 % Please edit documentation in R/sftp_mkdir.R
 \name{sftp_mkdir}
 \alias{sftp_mkdir}
-\title{Create Remote Directories via SFTP}
+\title{Create Remote Directories in SFTP}
 \usage{
 sftp_mkdir(
   sftp_conn,
@@ -13,21 +13,30 @@ sftp_mkdir(
 )
 }
 \arguments{
-\item{sftp_conn}{An \code{SFTPConn} R6 object, created by
-\code{\link{sftp_connect}}.}
+\item{sftp_conn}{An \code{SFTPConn} object containing connection details and
+authentication. Created by \code{\link{sftp_connect()}}.}
 
-\item{remote_url}{Character. The relative or absolute path of the directory
-to create.}
+\item{remote_url}{Character. The full URL or path of the file or directory to
+be operated on.}
 
-\item{.recursive}{Logical. If \code{TRUE}, creates missing parent
-directories. Defaults to \code{TRUE}.}
+\item{.recursive}{Logical. Defaults to \code{FALSE}. If \code{TRUE},
+will recursively perform the SFTP operation:
+\itemize{
+  \item \code{sftp_delete()}: deletes the directory and everything within.
+  \item \code{sftp_list()}: lists all the directories and files.
+  \item \code{sftp_mkdir()}: creates all the missing parent directories.
+  \item \code{sftp_rename()}: see \code{sftp_mkdir()}.
+}}
 
 \item{.verbose}{Logical. Defaults to \code{TRUE}.
 Prints helpful messages.}
 
-\item{.ignore_error}{Logical. If \code{FALSE}, the function uses the \code{*}
+\item{.ignore_error}{Logical. If \code{TRUE}, the function uses the \code{*}
 prefix in the curl quote command to ignore errors (e.g., if the directory
-already exists). Defaults to \code{!.recursive}.}
+already exists). This is useful in \code{.recursive = TRUE} because
+attempting to create a directory that already exists will return error.
+While this can be avoided by checking for directory existence, doing so
+adds extra step that impacts performance.}
 }
 \value{
 \code{invisible(TRUE)} on success.

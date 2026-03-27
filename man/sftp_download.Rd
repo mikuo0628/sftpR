@@ -15,25 +15,25 @@ sftp_download(
 )
 }
 \arguments{
-\item{sftp_conn}{An \code{SFTPConn} R6 object, created by
-\code{\link{sftp_connect}}.}
+\item{sftp_conn}{An \code{SFTPConn} object containing connection details and
+authentication. Created by \code{\link{sftp_connect()}}.}
 
 \item{remote_file}{Character. The path or URL of the file on the SFTP server.}
 
 \item{local_file}{Character or \code{NULL}.
 \itemize{
+  \item If \code{NA} (default) or an \code{""}: The file is saved to
+    the current working directory while using \code{remote_file} filename.
   \item If \code{character}: The local path where the file should be saved.
-  \item If \code{NA} (default) or an empty string: The file is saved to
-    the current working directory using its remote filename.
   \item If \code{NULL}: The file is downloaded to memory and
     returned as a \code{raw} vector.
 }}
 
-\item{.create_dir}{Logical. If \code{TRUE}, creates the local destination
-directory if it does not exist. Defaults to \code{FALSE}.}
+\item{.create_dir}{Logical. Defaults to \code{FALSE}. If \code{TRUE},
+creates the necessary parent directories if needed.}
 
-\item{.overwrite}{Logical. If \code{FALSE} (default), the function willthrow
-an error if a local file already exists at the destination.}
+\item{.overwrite}{Logical. Defaults to \code{FALSE}. If \code{TRUE}, will
+overwrite destination file.}
 
 \item{.verbose}{Logical. Defaults to \code{TRUE}.
 Prints helpful messages.}
@@ -55,7 +55,7 @@ or directly into R's memory as a raw vector.
 \itemize{
   \item \strong{Directory Detection:} If the path exists as a directory, ends
     in a trailing slash, or has no file extension, it is treated as a folder.
-    The remote filename will be appended to this path.
+    The \code{remote_file} filename will be appended to this path.
   \item \strong{File Detection:} If the path does not exist and contains a
     file extension (e.g., ".csv"), it is treated as the final destination
     filename.

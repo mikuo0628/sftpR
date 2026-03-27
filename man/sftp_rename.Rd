@@ -13,16 +13,21 @@ sftp_rename(
 )
 }
 \arguments{
-\item{sftp_conn}{An \code{SFTPConn} R6 object,
-created by \code{\link{sftp_connect}}.}
+\item{sftp_conn}{An \code{SFTPConn} object containing connection details and
+authentication. Created by \code{\link{sftp_connect()}}.}
 
 \item{remote_url_from}{Character. The current path of the file or directory.}
 
 \item{remote_url_to}{Character. The new path for the file or directory.}
 
-\item{.recursive}{Logical. If \code{TRUE}, automatically creates any missing
-parent directories in the destination path using \code{\link{sftp_mkdir}}.
-Defaults to \code{FALSE}.}
+\item{.recursive}{Logical. Defaults to \code{FALSE}. If \code{TRUE},
+will recursively perform the SFTP operation:
+\itemize{
+  \item \code{sftp_delete()}: deletes the directory and everything within.
+  \item \code{sftp_list()}: lists all the directories and files.
+  \item \code{sftp_mkdir()}: creates all the missing parent directories.
+  \item \code{sftp_rename()}: see \code{sftp_mkdir()}.
+}}
 
 \item{.verbose}{Logical. Defaults to \code{TRUE}.
 Prints helpful messages.}
@@ -38,9 +43,8 @@ move files between directories.
 The SFTP protocol's \code{rename} command is typically non-overwriting. If
 \code{remote_url_to} already exists, the operation will fail.
 
-When \code{.recursive = TRUE}, the function extracts the directory component
-of \code{remote_url_to} and ensures it exists on the server before attempting
-the rename.
+When \code{.recursive = TRUE}, parent directories of \code{remote_url_to}
+are identified, and existence ensured before attempting the renaming.
 }
 \examples{
 \dontrun{

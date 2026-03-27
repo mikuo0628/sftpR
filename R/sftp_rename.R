@@ -3,18 +3,11 @@
 #' Renames a file or directory on the SFTP server. This can also be used to
 #' move files between directories.
 #'
-#' @inheritParams sftp_connect
-#'
-#' @param sftp_conn An \code{SFTPConn} R6 object,
-#'   created by \code{\link{sftp_connect}}.
+#' @inheritParams shared_params
 #'
 #' @param remote_url_from Character. The current path of the file or directory.
 #'
 #' @param remote_url_to Character. The new path for the file or directory.
-#'
-#' @param .recursive Logical. If \code{TRUE}, automatically creates any missing
-#'   parent directories in the destination path using \code{\link{sftp_mkdir}}.
-#'   Defaults to \code{FALSE}.
 #'
 #' @return \code{invisible(TRUE)} on success.
 #'
@@ -22,9 +15,8 @@
 #' The SFTP protocol's \code{rename} command is typically non-overwriting. If
 #' \code{remote_url_to} already exists, the operation will fail.
 #'
-#' When \code{.recursive = TRUE}, the function extracts the directory component
-#' of \code{remote_url_to} and ensures it exists on the server before attempting
-#' the rename.
+#' When \code{.recursive = TRUE}, parent directories of \code{remote_url_to}
+#' are identified, and existence ensured before attempting the renaming.
 #'
 #' @examples
 #' \dontrun{

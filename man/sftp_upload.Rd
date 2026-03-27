@@ -13,18 +13,18 @@ sftp_upload(
 )
 }
 \arguments{
-\item{sftp_conn}{An \code{SFTPConn} R6 object, created by
-\code{sftp_connect}.}
+\item{sftp_conn}{An \code{SFTPConn} object containing connection details and
+authentication. Created by \code{\link{sftp_connect()}}.}
 
 \item{local_file}{Character string (path to a file) or a \code{data.frame}.
 Data frames are automatically written to a temp file before upload.
 The temp file will automatically be cleaned up at the end of function.}
 
 \item{remote_file}{Character string. The destination path on the server.
-If \code{NULL}, attempts to use the basename of the `local_file`.}
+If \code{NULL}, attempts to use the basename of the \code{local_file}.}
 
-\item{.create_dir}{Logical. If \code{TRUE}, recursively creates missing
-remote directories in the path (\code{CURLOPT_FTP_CREATE_MISSING_DIRS}).}
+\item{.create_dir}{Logical. Defaults to \code{FALSE}. If \code{TRUE},
+creates the necessary parent directories if needed.}
 
 \item{.verbose}{Logical. Defaults to \code{TRUE}.
 Prints helpful messages.}

@@ -1,26 +1,9 @@
 #' Create an \code{SFTPConn} R6 object that contains important connection
-#' information safely.
+#' information safely
 #'
 #' @inherit sftp_conn_generator description
 #'
-#' @param protocol Character. Protocol string. Defaults to "sftp".
-#'
-#' @param hostname Character. Server URL or IP. Defaults to "localhost".
-#'
-#' @param path Character. Sub-path on server.
-#'
-#' @param port Character. Port number. Defaults to "22".
-#'
-#' @param user Character. SFTP account name.
-#'
-#' @param password Character. SFTP password.
-#'
-#' @param timeout Integer. Connection timeout.
-#'
-#' @param ... Additional arguments passed to \code{curl::handle_setopt()}.
-#'
-#' @param .verbose Logical. Defaults to \code{TRUE}.
-#'   Prints helpful messages.
+#' @inheritParams shared_params
 #'
 #' @inherit sftp_conn_generator details
 #'
@@ -68,17 +51,21 @@ sftp_connect <- function(
 #' @description
 #' An R6 class to safely store information needed for SFTP connection,
 #' with convenient methods to check connections and existence of files or
-#' directories, and create specific handles that are used in \code{sftp_*}
-#' functions for CRUD operations.
+#' directories, and create specific handles for \code{sftp_*} function family of
+#' CRUD operations.
 #'
 #' @details
-#' One important goal of this designing choice is to keep user credentials
-#' safe, as private fields. They are used downstream to create necessary
-#' handles for specific SFTP operations, and users do not need to reenter them.
-#' This class has a safe printing method for some basic information, and to
-#' ensure credential is valid for connection.
+#' One important goal of this design choice is to keep user credentials
+#' safe, as private fields. Credentails are used to create specific handles
+#' for \code{sftp_*} family, and are reused where approrpiate. \code{SFTPConn}
+#' This class checks if credential is valid, and has a internal convenience
+#' methods such as safe printing for basic information, checking destination
+#' existence, and ensuring URL is correctly formatted.
+#'
+#' @return \code{SFTPConn} R6 class object, used in \code{sftp_*} family.
 #'
 #' @keywords internal
+#' 
 sftp_conn_generator <- R6::R6Class(
   "SFTPConn",
   public = list(
@@ -132,7 +119,6 @@ sftp_conn_generator <- R6::R6Class(
     #' @return An `SFTPConn` object with safely stored user credential and
     #'  convenience methods for various operations, such as checking connection
     #'  and existence, and creating handles for CRUD operations.
-    #'
     initialize = function(protocol = "sftp",
                           hostname = "localhost",
                           path     = NULL,

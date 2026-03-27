@@ -5,21 +5,14 @@
 #' server. It manages the libcurl handle lifecycle, ensures connections are
 #' closed, and validates URLs against the connection's "Source of Truth".
 #'
-#' @inheritParams sftp_connect
-#'
-#' @param sftp_conn An \code{SFTPConn} R6 object, created by
-#'   \code{sftp_connect}.
+#' @inheritParams shared_params
 #'
 #' @param local_file Character string (path to a file) or a \code{data.frame}.
 #'   Data frames are automatically written to a temp file before upload.
 #'   The temp file will automatically be cleaned up at the end of function.
 #'
 #' @param remote_file Character string. The destination path on the server.
-#'   If \code{NULL}, attempts to use the basename of the `local_file`.
-#'
-#' @param .create_dir Logical. If \code{TRUE}, recursively creates missing
-#'   remote directories in the path (\code{CURLOPT_FTP_CREATE_MISSING_DIRS}).
-#'
+#'   If \code{NULL}, attempts to use the basename of the \code{local_file}.
 #'
 #' @return
 #'   Returns \code{TRUE} (invisibly) on success. Throws an error on failure.

@@ -8,27 +8,28 @@ sftp_list(
   sftp_conn = NULL,
   sftp_url = NULL,
   .verbose = TRUE,
-  .recursive = FALSE,
-  .check = .recursive
+  .recursive = FALSE
 )
 }
 \arguments{
-\item{sftp_conn}{A \code{SFTPConn} object containing connection details and
-authentication. Created by \code{\link{sftp_connect}}.}
+\item{sftp_conn}{An \code{SFTPConn} object containing connection details and
+authentication. Created by \code{\link{sftp_connect()}}.}
 
-\item{sftp_url}{A SFTP URL of which the contents will be listed. If `NULL`,
-the base URL in \code{SFTPConn} will be used: contents of the SFTP home
-folder will be listed.}
+\item{sftp_url}{A SFTP URL of which the contents will be listed. If
+\code{NULL}, the base URL in \code{SFTPConn} will be used:
+contents of the SFTP home folder will be listed.}
 
 \item{.verbose}{Logical. Defaults to \code{TRUE}.
 Prints helpful messages.}
 
-\item{.recursive}{Logical. If \code{TRUE}, recursively enters subdirectories
-to return a flattened tree of all remote objects. Defaults to \code{FALSE}.}
-
-\item{.check}{Logical. If \code{TRUE}, determines \code{sftp_url} is a
-directory or a file, and modify the URL appropriately if needed.
-Defaults to value of \code{.recursive}.}
+\item{.recursive}{Logical. Defaults to \code{FALSE}. If \code{TRUE},
+will recursively perform the SFTP operation:
+\itemize{
+  \item \code{sftp_delete()}: deletes the directory and everything within.
+  \item \code{sftp_list()}: lists all the directories and files.
+  \item \code{sftp_mkdir()}: creates all the missing parent directories.
+  \item \code{sftp_rename()}: see \code{sftp_mkdir()}.
+}}
 }
 \value{
 A \code{data.frame} containing remote file/directory metadata:
@@ -63,6 +64,5 @@ sftp_conn <- sftp_connect(
 
 # List recursively
 sftp_list(sftp_conn, .recursive = TRUE)
-
 }
 }

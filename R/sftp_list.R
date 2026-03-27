@@ -6,21 +6,11 @@
 #' algorithm to detect and skip circular symbolic links, preventing
 #' infinite recursion and stack overflow errors.
 #'
-#' @inheritParams sftp_connect
+#' @inheritParams shared_params
 #'
-#' @param sftp_conn A \code{SFTPConn} object containing connection details and
-#'   authentication. Created by \code{\link{sftp_connect}}.
-#'
-#' @param sftp_url A SFTP URL of which the contents will be listed. If `NULL`,
-#'   the base URL in \code{SFTPConn} will be used: contents of the SFTP home
-#'   folder will be listed.
-#'
-#' @param .recursive Logical. If \code{TRUE}, recursively enters subdirectories
-#'   to return a flattened tree of all remote objects. Defaults to \code{FALSE}.
-#'
-#' @param .check Logical. If \code{TRUE}, determines \code{sftp_url} is a
-#'   directory or a file, and modify the URL appropriately if needed.
-#'   Defaults to value of \code{.recursive}.
+#' @param sftp_url A SFTP URL of which the contents will be listed. If
+#'   \code{NULL}, the base URL in \code{SFTPConn} will be used:
+#'   contents of the SFTP home folder will be listed.
 #'
 #' @return A \code{data.frame} containing remote file/directory metadata:
 #' \itemize{
@@ -47,21 +37,18 @@
 #'
 #' # List recursively
 #' sftp_list(sftp_conn, .recursive = TRUE)
-#'
 #' }
 #' @export
 sftp_list <- function(
     sftp_conn = NULL,
     sftp_url = NULL,
     .verbose = TRUE,
-    .recursive = FALSE,
-    .check = .recursive) {
+    .recursive = FALSE) {
   sftp_url <-
     if (is.null(sftp_url)) {
       sftp_conn$clean_url$full_url
     } else {
-      # Sanitize `sftp_url`: checks with source of truth, check type and
-      # append trailing slash if needed.
+      # Sanitize `sftp_url`: checks with source of truth.
       # Trailing slash is MANDATORY for directories: without it, `curl` thinks
       # the directory is a file and tries to "download" its binary content
       # (which fails). The slash is the signal to "enter" the folder.
@@ -70,10 +57,7 @@ sftp_list <- function(
       )
     }
 
-  resp <-
-    try(
-      curl::curl_fetch_memory(sftp_url, sftp_conn$h)
-    )
+  resp <- try(curl::curl_fetch_memory(sftp_url, sftp_conn$h))
 
   if (resp$status_code != 0 || inherits(resp, "try-error")) {
     stop("SFTP connection issue")
@@ -84,7 +68,9 @@ sftp_list <- function(
   # recursively crawl subdirectories
   if (isTRUE(.recursive)) {
     sftp_crawl <- function(df_objs, visited = character()) {
-      if (all(df_objs$type == "file")) return(df_objs)
+      if (all(df_objs$type == "file")) {
+        return(df_objs)
+      }
 
       df_output <- data.frame()
 
@@ -147,6 +133,7 @@ sftp_list <- function(
 #' The function automatically filters out the special Unix directory entries
 #' \code{"."} and \code{".."}. It determines object types based on the first
 #' character of the permission string (e.g., 'd' for directory).
+#'
 #' @keywords internal
 .sftp_parse <- function(resp = NULL, sftp_url = NULL, h = NULL) {
   if (is.null(resp)) {
