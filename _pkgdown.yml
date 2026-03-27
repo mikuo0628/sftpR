@@ -2,4 +2,7 @@ url: https://mikuo0628.github.io/sftpR/
 template:
   bootstrap: 5
   bootswatch: flatly
+  light-switch: true
+  theme: github-light
+  theme-dark: github-dark
 
