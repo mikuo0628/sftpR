@@ -6,6 +6,9 @@
 
 ## Citation
 
+Source:
+[`DESCRIPTION`](https://github.com/mikuo0628/sftpR/blob/main/DESCRIPTION)
+
 Kuo M (2026). *sftpR: Robust 'SFTP' Interface Using 'curl'*. R package
 version 0.1.0, <https://mikuo0628.github.io/sftpR/>.
 
