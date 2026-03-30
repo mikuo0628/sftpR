@@ -8,7 +8,7 @@
 }
 \arguments{
 \item{sftp_conn}{An \code{SFTPConn} object containing connection details and
-authentication. Created by \code{\link{sftp_connect()}}.}
+authentication. Created by [sftp_connect()].}
 
 \item{user_url}{Character string. The destination SFTP URL or
 path provided by the user.}

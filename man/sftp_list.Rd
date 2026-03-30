@@ -13,7 +13,7 @@ sftp_list(
 }
 \arguments{
 \item{sftp_conn}{An \code{SFTPConn} object containing connection details and
-authentication. Created by \code{\link{sftp_connect()}}.}
+authentication. Created by [sftp_connect()].}
 
 \item{sftp_url}{A SFTP URL of which the contents will be listed. If
 \code{NULL}, the base URL in \code{SFTPConn} will be used:

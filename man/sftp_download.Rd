@@ -16,7 +16,7 @@ sftp_download(
 }
 \arguments{
 \item{sftp_conn}{An \code{SFTPConn} object containing connection details and
-authentication. Created by \code{\link{sftp_connect()}}.}
+authentication. Created by [sftp_connect()].}
 
 \item{remote_file}{Character. The path or URL of the file on the SFTP server.}
 
