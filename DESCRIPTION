@@ -50,3 +50,4 @@ Collate:
     'sftp_rename.R'
     'sftp_upload.R'
     'utils.R'
+    'shared_docs.R'
