@@ -14,7 +14,7 @@ sftp_rename(
 }
 \arguments{
 \item{sftp_conn}{An \code{SFTPConn} object containing connection details and
-authentication. Created by [sftp_connect()].}
+authentication. Created by \code{\link{sftp_connect}}.}
 
 \item{remote_url_from}{Character. The current path of the file or directory.}
 

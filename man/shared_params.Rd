@@ -24,7 +24,7 @@
 Prints helpful messages.}
 
 \item{sftp_conn}{An \code{SFTPConn} object containing connection details and
-authentication. Created by [sftp_connect()].}
+authentication. Created by \code{\link{sftp_connect}}.}
 
 \item{remote_url}{Character. The full URL or path of the file or directory to
 be operated on.}

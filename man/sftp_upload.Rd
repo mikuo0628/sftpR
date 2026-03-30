@@ -14,7 +14,7 @@ sftp_upload(
 }
 \arguments{
 \item{sftp_conn}{An \code{SFTPConn} object containing connection details and
-authentication. Created by [sftp_connect()].}
+authentication. Created by \code{\link{sftp_connect}}.}
 
 \item{local_file}{Character string (path to a file) or a \code{data.frame}.
 Data frames are automatically written to a temp file before upload.
