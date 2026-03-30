@@ -13,8 +13,7 @@ sftp_list(
   sftp_conn = NULL,
   sftp_url = NULL,
   .verbose = TRUE,
-  .recursive = FALSE,
-  .check = .recursive
+  .recursive = FALSE
 )
 ```
 
@@ -22,13 +21,12 @@ sftp_list(
 
 - sftp_conn:
 
-  A `SFTPConn` object containing connection details and authentication.
-  Created by
-  [`sftp_connect`](https://mikuo0628.github.io/sftpR/reference/sftp_connect.md).
+  An `SFTPConn` object containing connection details and authentication.
+  Created by \[sftp_connect()\].
 
 - sftp_url:
 
-  A SFTP URL of which the contents will be listed. If \`NULL\`, the base
+  A SFTP URL of which the contents will be listed. If `NULL`, the base
   URL in `SFTPConn` will be used: contents of the SFTP home folder will
   be listed.
 
@@ -38,14 +36,20 @@ sftp_list(
 
 - .recursive:
 
-  Logical. If `TRUE`, recursively enters subdirectories to return a
-  flattened tree of all remote objects. Defaults to `FALSE`.
+  Logical. Defaults to `FALSE`. If `TRUE`, will recursively perform the
+  SFTP operation:
 
-- .check:
+  - [`sftp_delete()`](https://mikuo0628.github.io/sftpR/reference/sftp_delete.md):
+    deletes the directory and everything within.
 
-  Logical. If `TRUE`, determines `sftp_url` is a directory or a file,
-  and modify the URL appropriately if needed. Defaults to value of
-  `.recursive`.
+  - `sftp_list()`: lists all the directories and files.
+
+  - [`sftp_mkdir()`](https://mikuo0628.github.io/sftpR/reference/sftp_mkdir.md):
+    creates all the missing parent directories.
+
+  - [`sftp_rename()`](https://mikuo0628.github.io/sftpR/reference/sftp_rename.md):
+    see
+    [`sftp_mkdir()`](https://mikuo0628.github.io/sftpR/reference/sftp_mkdir.md).
 
 ## Value
 
@@ -83,6 +87,5 @@ sftp_conn <- sftp_connect(
 
 # List recursively
 sftp_list(sftp_conn, .recursive = TRUE)
-
 } # }
 ```

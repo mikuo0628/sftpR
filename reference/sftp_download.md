@@ -21,8 +21,8 @@ sftp_download(
 
 - sftp_conn:
 
-  An `SFTPConn` R6 object, created by
-  [`sftp_connect`](https://mikuo0628.github.io/sftpR/reference/sftp_connect.md).
+  An `SFTPConn` object containing connection details and authentication.
+  Created by \[sftp_connect()\].
 
 - remote_file:
 
@@ -32,23 +32,23 @@ sftp_download(
 
   Character or `NULL`.
 
-  - If `character`: The local path where the file should be saved.
+  - If `NA` (default) or an `""`: The file is saved to the current
+    working directory while using `remote_file` filename.
 
-  - If `NA` (default) or an empty string: The file is saved to the
-    current working directory using its remote filename.
+  - If `character`: The local path where the file should be saved.
 
   - If `NULL`: The file is downloaded to memory and returned as a `raw`
     vector.
 
 - .create_dir:
 
-  Logical. If `TRUE`, creates the local destination directory if it does
-  not exist. Defaults to `FALSE`.
+  Logical. Defaults to `FALSE`. If `TRUE`, creates the necessary parent
+  directories if needed.
 
 - .overwrite:
 
-  Logical. If `FALSE` (default), the function willthrow an error if a
-  local file already exists at the destination.
+  Logical. Defaults to `FALSE`. If `TRUE`, will overwrite destination
+  file.
 
 - .verbose:
 
@@ -71,7 +71,7 @@ To provide a "smart" user experience, the function guesses if
 
 - **Directory Detection:** If the path exists as a directory, ends in a
   trailing slash, or has no file extension, it is treated as a folder.
-  The remote filename will be appended to this path.
+  The `remote_file` filename will be appended to this path.
 
 - **File Detection:** If the path does not exist and contains a file
   extension (e.g., ".csv"), it is treated as the final destination

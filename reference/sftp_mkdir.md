@@ -1,4 +1,4 @@
-# Create Remote Directories via SFTP
+# Create Remote Directories in SFTP
 
 This function creates directories on a remote server using the SFTP
 protocol. It supports recursive directory creation, effectively behaving
@@ -20,17 +20,29 @@ sftp_mkdir(
 
 - sftp_conn:
 
-  An `SFTPConn` R6 object, created by
-  [`sftp_connect`](https://mikuo0628.github.io/sftpR/reference/sftp_connect.md).
+  An `SFTPConn` object containing connection details and authentication.
+  Created by \[sftp_connect()\].
 
 - remote_url:
 
-  Character. The relative or absolute path of the directory to create.
+  Character. The full URL or path of the file or directory to be
+  operated on.
 
 - .recursive:
 
-  Logical. If `TRUE`, creates missing parent directories. Defaults to
-  `TRUE`.
+  Logical. Defaults to `FALSE`. If `TRUE`, will recursively perform the
+  SFTP operation:
+
+  - [`sftp_delete()`](https://mikuo0628.github.io/sftpR/reference/sftp_delete.md):
+    deletes the directory and everything within.
+
+  - [`sftp_list()`](https://mikuo0628.github.io/sftpR/reference/sftp_list.md):
+    lists all the directories and files.
+
+  - `sftp_mkdir()`: creates all the missing parent directories.
+
+  - [`sftp_rename()`](https://mikuo0628.github.io/sftpR/reference/sftp_rename.md):
+    see `sftp_mkdir()`.
 
 - .verbose:
 
@@ -38,9 +50,12 @@ sftp_mkdir(
 
 - .ignore_error:
 
-  Logical. If `FALSE`, the function uses the `*` prefix in the curl
-  quote command to ignore errors (e.g., if the directory already
-  exists). Defaults to `!.recursive`.
+  Logical. If `TRUE`, the function uses the `*` prefix in the curl quote
+  command to ignore errors (e.g., if the directory already exists). This
+  is useful in `.recursive = TRUE` because attempting to create a
+  directory that already exists will return error. While this can be
+  avoided by checking for directory existence, doing so adds extra step
+  that impacts performance.
 
 ## Value
 

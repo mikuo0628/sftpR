@@ -64,8 +64,8 @@ closed, and validates URLs against the connection's "Source of Truth".</p>
 
 
 <dl><dt id="arg-sftp-conn">sftp_conn<a class="anchor" aria-label="anchor" href="#arg-sftp-conn"></a></dt>
-<dd><p>An <code>SFTPConn</code> R6 object, created by
-<code>sftp_connect</code>.</p></dd>
+<dd><p>An <code>SFTPConn</code> object containing connection details and
+authentication. Created by [sftp_connect()].</p></dd>
 
 
 <dt id="arg-local-file">local_file<a class="anchor" aria-label="anchor" href="#arg-local-file"></a></dt>
@@ -76,12 +76,12 @@ The temp file will automatically be cleaned up at the end of function.</p></dd>
 
 <dt id="arg-remote-file">remote_file<a class="anchor" aria-label="anchor" href="#arg-remote-file"></a></dt>
 <dd><p>Character string. The destination path on the server.
-If <code>NULL</code>, attempts to use the basename of the `local_file`.</p></dd>
+If <code>NULL</code>, attempts to use the basename of the <code>local_file</code>.</p></dd>
 
 
 <dt id="arg--create-dir">.create_dir<a class="anchor" aria-label="anchor" href="#arg--create-dir"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, recursively creates missing
-remote directories in the path (<code>CURLOPT_FTP_CREATE_MISSING_DIRS</code>).</p></dd>
+<dd><p>Logical. Defaults to <code>FALSE</code>. If <code>TRUE</code>,
+creates the necessary parent directories if needed.</p></dd>
 
 
 <dt id="arg--verbose">.verbose<a class="anchor" aria-label="anchor" href="#arg--verbose"></a></dt>

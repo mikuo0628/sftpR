@@ -6,7 +6,7 @@
   :
 
   Create an `SFTPConn` R6 object that contains important connection
-  information safely.
+  information safely
 
 - [`sftp_delete()`](https://mikuo0628.github.io/sftpR/reference/sftp_delete.md)
   : Delete Files or Directories from SFTP Server
@@ -18,7 +18,7 @@
   : List and Crawl SFTP Directory Contents
 
 - [`sftp_mkdir()`](https://mikuo0628.github.io/sftpR/reference/sftp_mkdir.md)
-  : Create Remote Directories via SFTP
+  : Create Remote Directories in SFTP
 
 - [`sftp_rename()`](https://mikuo0628.github.io/sftpR/reference/sftp_rename.md)
   : Rename or Move Remote SFTP Resources

@@ -61,8 +61,8 @@ move files between directories.</p>
 
 
 <dl><dt id="arg-sftp-conn">sftp_conn<a class="anchor" aria-label="anchor" href="#arg-sftp-conn"></a></dt>
-<dd><p>An <code>SFTPConn</code> R6 object,
-created by <code><a href="sftp_connect.html">sftp_connect</a></code>.</p></dd>
+<dd><p>An <code>SFTPConn</code> object containing connection details and
+authentication. Created by [sftp_connect()].</p></dd>
 
 
 <dt id="arg-remote-url-from">remote_url_from<a class="anchor" aria-label="anchor" href="#arg-remote-url-from"></a></dt>
@@ -74,9 +74,12 @@ created by <code><a href="sftp_connect.html">sftp_connect</a></code>.</p></dd>
 
 
 <dt id="arg--recursive">.recursive<a class="anchor" aria-label="anchor" href="#arg--recursive"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, automatically creates any missing
-parent directories in the destination path using <code><a href="sftp_mkdir.html">sftp_mkdir</a></code>.
-Defaults to <code>FALSE</code>.</p></dd>
+<dd><p>Logical. Defaults to <code>FALSE</code>. If <code>TRUE</code>,
+will recursively perform the SFTP operation:</p><ul><li><p><code><a href="sftp_delete.html">sftp_delete()</a></code>: deletes the directory and everything within.</p></li>
+<li><p><code><a href="sftp_list.html">sftp_list()</a></code>: lists all the directories and files.</p></li>
+<li><p><code><a href="sftp_mkdir.html">sftp_mkdir()</a></code>: creates all the missing parent directories.</p></li>
+<li><p><code>sftp_rename()</code>: see <code><a href="sftp_mkdir.html">sftp_mkdir()</a></code>.</p></li>
+</ul></dd>
 
 
 <dt id="arg--verbose">.verbose<a class="anchor" aria-label="anchor" href="#arg--verbose"></a></dt>
@@ -92,9 +95,8 @@ Prints helpful messages.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The SFTP protocol's <code>rename</code> command is typically non-overwriting. If
 <code>remote_url_to</code> already exists, the operation will fail.</p>
-<p>When <code>.recursive = TRUE</code>, the function extracts the directory component
-of <code>remote_url_to</code> and ensures it exists on the server before attempting
-the rename.</p>
+<p>When <code>.recursive = TRUE</code>, parent directories of <code>remote_url_to</code>
+are identified, and existence ensured before attempting the renaming.</p>
     </div>
 
     <div class="section level2">

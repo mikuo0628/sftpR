@@ -60,8 +60,7 @@ infinite recursion and stack overflow errors.</p>
 <span>  sftp_conn <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sftp_url <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  .verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  .recursive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  .check <span class="op">=</span> <span class="va">.recursive</span></span>
+<span>  .recursive <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -70,14 +69,14 @@ infinite recursion and stack overflow errors.</p>
 
 
 <dl><dt id="arg-sftp-conn">sftp_conn<a class="anchor" aria-label="anchor" href="#arg-sftp-conn"></a></dt>
-<dd><p>A <code>SFTPConn</code> object containing connection details and
-authentication. Created by <code><a href="sftp_connect.html">sftp_connect</a></code>.</p></dd>
+<dd><p>An <code>SFTPConn</code> object containing connection details and
+authentication. Created by [sftp_connect()].</p></dd>
 
 
 <dt id="arg-sftp-url">sftp_url<a class="anchor" aria-label="anchor" href="#arg-sftp-url"></a></dt>
-<dd><p>A SFTP URL of which the contents will be listed. If `NULL`,
-the base URL in <code>SFTPConn</code> will be used: contents of the SFTP home
-folder will be listed.</p></dd>
+<dd><p>A SFTP URL of which the contents will be listed. If
+<code>NULL</code>, the base URL in <code>SFTPConn</code> will be used:
+contents of the SFTP home folder will be listed.</p></dd>
 
 
 <dt id="arg--verbose">.verbose<a class="anchor" aria-label="anchor" href="#arg--verbose"></a></dt>
@@ -86,14 +85,12 @@ Prints helpful messages.</p></dd>
 
 
 <dt id="arg--recursive">.recursive<a class="anchor" aria-label="anchor" href="#arg--recursive"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, recursively enters subdirectories
-to return a flattened tree of all remote objects. Defaults to <code>FALSE</code>.</p></dd>
-
-
-<dt id="arg--check">.check<a class="anchor" aria-label="anchor" href="#arg--check"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, determines <code>sftp_url</code> is a
-directory or a file, and modify the URL appropriately if needed.
-Defaults to value of <code>.recursive</code>.</p></dd>
+<dd><p>Logical. Defaults to <code>FALSE</code>. If <code>TRUE</code>,
+will recursively perform the SFTP operation:</p><ul><li><p><code><a href="sftp_delete.html">sftp_delete()</a></code>: deletes the directory and everything within.</p></li>
+<li><p><code>sftp_list()</code>: lists all the directories and files.</p></li>
+<li><p><code><a href="sftp_mkdir.html">sftp_mkdir()</a></code>: creates all the missing parent directories.</p></li>
+<li><p><code><a href="sftp_rename.html">sftp_rename()</a></code>: see <code><a href="sftp_mkdir.html">sftp_mkdir()</a></code>.</p></li>
+</ul></dd>
 
 </dl></div>
     <div class="section level2">
@@ -122,7 +119,6 @@ Defaults to value of <code>.recursive</code>.</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># List recursively</span></span></span>
 <span class="r-in"><span><span class="fu">sftp_list</span><span class="op">(</span><span class="va">sftp_conn</span>, .recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

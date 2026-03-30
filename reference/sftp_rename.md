@@ -19,8 +19,8 @@ sftp_rename(
 
 - sftp_conn:
 
-  An `SFTPConn` R6 object, created by
-  [`sftp_connect`](https://mikuo0628.github.io/sftpR/reference/sftp_connect.md).
+  An `SFTPConn` object containing connection details and authentication.
+  Created by \[sftp_connect()\].
 
 - remote_url_from:
 
@@ -32,10 +32,20 @@ sftp_rename(
 
 - .recursive:
 
-  Logical. If `TRUE`, automatically creates any missing parent
-  directories in the destination path using
-  [`sftp_mkdir`](https://mikuo0628.github.io/sftpR/reference/sftp_mkdir.md).
-  Defaults to `FALSE`.
+  Logical. Defaults to `FALSE`. If `TRUE`, will recursively perform the
+  SFTP operation:
+
+  - [`sftp_delete()`](https://mikuo0628.github.io/sftpR/reference/sftp_delete.md):
+    deletes the directory and everything within.
+
+  - [`sftp_list()`](https://mikuo0628.github.io/sftpR/reference/sftp_list.md):
+    lists all the directories and files.
+
+  - [`sftp_mkdir()`](https://mikuo0628.github.io/sftpR/reference/sftp_mkdir.md):
+    creates all the missing parent directories.
+
+  - `sftp_rename()`: see
+    [`sftp_mkdir()`](https://mikuo0628.github.io/sftpR/reference/sftp_mkdir.md).
 
 - .verbose:
 
@@ -50,9 +60,8 @@ sftp_rename(
 The SFTP protocol's `rename` command is typically non-overwriting. If
 `remote_url_to` already exists, the operation will fail.
 
-When `.recursive = TRUE`, the function extracts the directory component
-of `remote_url_to` and ensures it exists on the server before attempting
-the rename.
+When `.recursive = TRUE`, parent directories of `remote_url_to` are
+identified, and existence ensured before attempting the renaming.
 
 ## Examples
 

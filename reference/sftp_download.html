@@ -63,8 +63,8 @@ or directly into R's memory as a raw vector.</p>
 
 
 <dl><dt id="arg-sftp-conn">sftp_conn<a class="anchor" aria-label="anchor" href="#arg-sftp-conn"></a></dt>
-<dd><p>An <code>SFTPConn</code> R6 object, created by
-<code><a href="sftp_connect.html">sftp_connect</a></code>.</p></dd>
+<dd><p>An <code>SFTPConn</code> object containing connection details and
+authentication. Created by [sftp_connect()].</p></dd>
 
 
 <dt id="arg-remote-file">remote_file<a class="anchor" aria-label="anchor" href="#arg-remote-file"></a></dt>
@@ -72,22 +72,22 @@ or directly into R's memory as a raw vector.</p>
 
 
 <dt id="arg-local-file">local_file<a class="anchor" aria-label="anchor" href="#arg-local-file"></a></dt>
-<dd><p>Character or <code>NULL</code>.</p><ul><li><p>If <code>character</code>: The local path where the file should be saved.</p></li>
-<li><p>If <code>NA</code> (default) or an empty string: The file is saved to
-    the current working directory using its remote filename.</p></li>
+<dd><p>Character or <code>NULL</code>.</p><ul><li><p>If <code>NA</code> (default) or an <code>""</code>: The file is saved to
+    the current working directory while using <code>remote_file</code> filename.</p></li>
+<li><p>If <code>character</code>: The local path where the file should be saved.</p></li>
 <li><p>If <code>NULL</code>: The file is downloaded to memory and
     returned as a <code>raw</code> vector.</p></li>
 </ul></dd>
 
 
 <dt id="arg--create-dir">.create_dir<a class="anchor" aria-label="anchor" href="#arg--create-dir"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, creates the local destination
-directory if it does not exist. Defaults to <code>FALSE</code>.</p></dd>
+<dd><p>Logical. Defaults to <code>FALSE</code>. If <code>TRUE</code>,
+creates the necessary parent directories if needed.</p></dd>
 
 
 <dt id="arg--overwrite">.overwrite<a class="anchor" aria-label="anchor" href="#arg--overwrite"></a></dt>
-<dd><p>Logical. If <code>FALSE</code> (default), the function willthrow
-an error if a local file already exists at the destination.</p></dd>
+<dd><p>Logical. Defaults to <code>FALSE</code>. If <code>TRUE</code>, will
+overwrite destination file.</p></dd>
 
 
 <dt id="arg--verbose">.verbose<a class="anchor" aria-label="anchor" href="#arg--verbose"></a></dt>
@@ -111,7 +111,7 @@ Prints helpful messages.</p></dd>
 <p>To provide a "smart" user experience, the function guesses
   if <code>local_file</code> is intended to be a directory or a specific filename:</p><ul><li><p><strong>Directory Detection:</strong> If the path exists as a directory, ends
     in a trailing slash, or has no file extension, it is treated as a folder.
-    The remote filename will be appended to this path.</p></li>
+    The <code>remote_file</code> filename will be appended to this path.</p></li>
 <li><p><strong>File Detection:</strong> If the path does not exist and contains a
     file extension (e.g., ".csv"), it is treated as the final destination
     filename.</p></li>

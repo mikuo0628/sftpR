@@ -1,7 +1,7 @@
 # Validate and Sanitize SFTP URLs against a Connection Object
 
 This internal utility ensures that a user-provided URL matches the
-"Source of Truth" defined in an \[SFTPConn\] object. It prevents common
+"Source of Truth" defined in an `SFTPConn` object. It prevents common
 formatting errors, warns against security-risky root access attempts
 (double slashes), and corrects any incongruities in the protocol,
 hostname, or port.
@@ -16,7 +16,8 @@ hostname, or port.
 
 - sftp_conn:
 
-  An \`R6\` object of class \`SFTPConn\`.
+  An `SFTPConn` object containing connection details and authentication.
+  Created by \[sftp_connect()\].
 
 - user_url:
 

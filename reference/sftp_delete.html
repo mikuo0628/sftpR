@@ -64,19 +64,22 @@ is specified.</p>
 
 
 <dl><dt id="arg-sftp-conn">sftp_conn<a class="anchor" aria-label="anchor" href="#arg-sftp-conn"></a></dt>
-<dd><p>An <code>SFTPConn</code> R6 object, created by
-<code><a href="sftp_connect.html">sftp_connect</a></code>.</p></dd>
+<dd><p>An <code>SFTPConn</code> object containing connection details and
+authentication. Created by [sftp_connect()].</p></dd>
 
 
 <dt id="arg-remote-url">remote_url<a class="anchor" aria-label="anchor" href="#arg-remote-url"></a></dt>
 <dd><p>Character. The full URL or path of the file or directory to
-be deleted.</p></dd>
+be operated on.</p></dd>
 
 
 <dt id="arg--recursive">.recursive<a class="anchor" aria-label="anchor" href="#arg--recursive"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, will recursively list and delete
-all contents within a directory before deleting the directory itself.
-Defaults to <code>FALSE</code>.</p></dd>
+<dd><p>Logical. Defaults to <code>FALSE</code>. If <code>TRUE</code>,
+will recursively perform the SFTP operation:</p><ul><li><p><code>sftp_delete()</code>: deletes the directory and everything within.</p></li>
+<li><p><code><a href="sftp_list.html">sftp_list()</a></code>: lists all the directories and files.</p></li>
+<li><p><code><a href="sftp_mkdir.html">sftp_mkdir()</a></code>: creates all the missing parent directories.</p></li>
+<li><p><code><a href="sftp_rename.html">sftp_rename()</a></code>: see <code><a href="sftp_mkdir.html">sftp_mkdir()</a></code>.</p></li>
+</ul></dd>
 
 
 <dt id="arg--verbose">.verbose<a class="anchor" aria-label="anchor" href="#arg--verbose"></a></dt>
@@ -85,9 +88,14 @@ Prints helpful messages.</p></dd>
 
 
 <dt id="arg--validate">.validate<a class="anchor" aria-label="anchor" href="#arg--validate"></a></dt>
-<dd><p>Logical. Whether to validate the <code>remote_url</code> against
-the connection object. Internally set to <code>FALSE</code> during recursive
-calls to improve performance.</p></dd>
+<dd><p>Logical. Whether to validate the <code>remote_url</code>
+against the connection object. Defaults to <code>TRUE</code>, which will parse
+<code>remote_url</code>, comapre to that of <code>SFTPConn</code>, and replaces parts
+incongruent with <code>SFTPConn</code>.
+Internally set to <code>FALSE</code> when <code>.recursive = TRUE</code> because
+the URLs produced by the listing operation aren't subjected to human
+errors, thus do not need further validation. This provides a minor
+performance boost.</p></dd>
 
 </dl></div>
     <div class="section level2">

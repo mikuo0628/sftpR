@@ -20,7 +20,8 @@ sftp_upload(
 
 - sftp_conn:
 
-  An `SFTPConn` R6 object, created by `sftp_connect`.
+  An `SFTPConn` object containing connection details and authentication.
+  Created by \[sftp_connect()\].
 
 - local_file:
 
@@ -31,12 +32,12 @@ sftp_upload(
 - remote_file:
 
   Character string. The destination path on the server. If `NULL`,
-  attempts to use the basename of the \`local_file\`.
+  attempts to use the basename of the `local_file`.
 
 - .create_dir:
 
-  Logical. If `TRUE`, recursively creates missing remote directories in
-  the path (`CURLOPT_FTP_CREATE_MISSING_DIRS`).
+  Logical. Defaults to `FALSE`. If `TRUE`, creates the necessary parent
+  directories if needed.
 
 - .verbose:
 
