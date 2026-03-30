@@ -84,6 +84,6 @@ sftp_rename(sftp_conn, "upload/file.txt", "upload/archive/file.backup")
 
 [libcurl]:        https://curl.se/libcurl/
 [stenevang_sftp]: https://github.com/stenevang/sftp
-[cran_curl]:      https://cran.r-project.org/web/packages/curl/index.html
+[cran_curl]:      https://cran.r-project.org/package=curl
 [jeroen_curl]:    https://jeroen.r-universe.dev/curl
-[cran_rcurl]:     https://cran.r-project.org/web/packages/RCurl/index.html
+[cran_rcurl]:     https://cran.r-project.org/package=RCurl
