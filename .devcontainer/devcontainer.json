@@ -23,6 +23,9 @@
     }
   },
   // This starts your test SFTP server automatically on boot
-  "postCreateCommand": "chmod +x .devcontainer/*.sh && bash .devcontainer/run_sftp.sh",
+  "remoteUser": "rstudio",
+  "containerUser": "rstudio",
+  "updateRemoteUserUID": true,
+  "postCreateCommand": "sudo chown -R rstudio:rstudio /workspaces && chmod +x .devcontainer/*.sh && bash .devcontainer/run_sftp.sh",
   "postStartCommand": "bash .devcontainer/start_sftp.sh"
 }
