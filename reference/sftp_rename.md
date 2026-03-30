@@ -20,7 +20,8 @@ sftp_rename(
 - sftp_conn:
 
   An `SFTPConn` object containing connection details and authentication.
-  Created by \[sftp_connect()\].
+  Created by
+  [`sftp_connect`](https://mikuo0628.github.io/sftpR/reference/sftp_connect.md).
 
 - remote_url_from:
 
