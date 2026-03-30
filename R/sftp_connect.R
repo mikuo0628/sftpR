@@ -65,7 +65,8 @@ sftp_connect <- function(
 #' @return \code{SFTPConn} R6 class object, used in \code{sftp_*} family.
 #'
 #' @keywords internal
-#' 
+#'
+#' @importFrom R6 R6Class
 sftp_conn_generator <- R6::R6Class(
   "SFTPConn",
   public = list(

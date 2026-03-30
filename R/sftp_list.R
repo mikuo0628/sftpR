@@ -160,16 +160,13 @@ sftp_list <- function(
     )
 
   # remove special directory entries
-  df_objs <- subset(df_objs, !name %in% c(".", ".."))
+  df_objs <- subset(df_objs, !df_objs$name %in% c(".", ".."))
 
   # handle type
   df_objs$type <-
     sapply(
       substr(df_objs$permission, 1, 1),
-      \(x) switch(x,
-        "d" = "dir",
-        "-" = "file"
-      ),
+      \(x) switch(x, "d" = "dir", "-" = "file"),
       simplify = TRUE
     )
 
