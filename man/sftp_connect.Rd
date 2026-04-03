@@ -55,7 +55,7 @@ methods such as safe printing for basic information, checking destination
 existence, and ensuring URL is correctly formatted.
 }
 \examples{
-\dontrun{
+\donttest{
 # Create a new SFTP connection
 sftp_conn <- sftp_connect(
   hostname = "127.0.0.1",

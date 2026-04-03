@@ -47,7 +47,7 @@ When \code{.recursive = TRUE}, parent directories of \code{remote_url_to}
 are identified, and existence ensured before attempting the renaming.
 }
 \examples{
-\dontrun{
+\donttest{
 # Simple rename in the same folder
 sftp_rename(sftp_conn, "old_name.csv", "new_name.csv")
 

@@ -52,7 +52,7 @@ attempts to create each one sequentially. It uses the \code{*} prefix for
 internal calls to ensure that existing directories do not trigger errors.
 }
 \examples{
-\dontrun{
+\donttest{
 # Create a nested directory structure
 sftp_mkdir(sftp_conn, "project/data/results/2026", .recursive = TRUE)
 

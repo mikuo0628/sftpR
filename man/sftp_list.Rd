@@ -53,7 +53,7 @@ algorithm to detect and skip circular symbolic links, preventing
 infinite recursion and stack overflow errors.
 }
 \examples{
-\dontrun{
+\donttest{
 # Create a new SFTP connection
 sftp_conn <- sftp_connect(
   hostname = "127.0.0.1",

@@ -29,7 +29,7 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' conn <- sftp_connect(hostname = "sftp.example.com", user = "user")
 #' sftp_upload(conn, my_df, "uploads/data.csv")
 #' }

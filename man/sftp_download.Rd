@@ -66,7 +66,7 @@ or directly into R's memory as a raw vector.
 }
 
 \examples{
-\dontrun{
+\donttest{
 # Download and use the remote filename
 sftp_download(sftp_conn, "data/raw_logs.zip")
 

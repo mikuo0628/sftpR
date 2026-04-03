@@ -60,7 +60,7 @@ is specified.
 }
 
 \examples{
-\dontrun{
+\donttest{
 # Delete a single file
 sftp_delete(sftp_conn, "project/old_report.csv")
 
