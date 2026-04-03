@@ -17,3 +17,4 @@
 ^\.github$
 .Rprofile
 ^codecov\.yml$
+^cran-comments\.md$
