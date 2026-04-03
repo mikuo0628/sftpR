@@ -1,6 +1,6 @@
 Package: sftpR
 Type: Package
-Title: Robust 'SFTP' Interface Using 'curl'
+Title: Robust SFTP Interface Using 'curl'
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -11,7 +11,7 @@ Authors@R: c(
     )
   )
 Description: Provides a high-level, object-oriented interface for Secure 
-    File Transfer Protocol ('SFTP') operations built upon the 'curl' 
+    File Transfer Protocol (SFTP) operations built upon the 'curl' 
     package. The package implements an 'R6' class to manage persistent 
     connections and provides 'tidyverse'-style functions for common file 
     system tasks. Key features include recursive directory creation with 
@@ -19,7 +19,7 @@ Description: Provides a high-level, object-oriented interface for Secure
     between files and directories, and the ability to download remote 
     resources directly into memory as raw vectors for seamless 
     integration into data processing pipelines. It is designed to handle 
-    common 'SFTP' edge cases gracefully, providing informative error 
+    common SFTP edge cases gracefully, providing informative error 
     messages and robust path sanitization to ensure compatibility across 
     different server configurations.
 License: MIT + file LICENSE
