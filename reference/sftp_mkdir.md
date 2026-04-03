@@ -73,10 +73,20 @@ errors.
 
 ``` r
 if (FALSE) { # \dontrun{
-# Create a nested directory structure
-sftp_mkdir(sftp_conn, "project/data/results/2026", .recursive = TRUE)
+if (interactive() || Sys.getenv("R_SFTP_TEST_SERVER") == "true") {
+  # Create new SFTP connection
+  sftp_conn <- sftp_connect(
+    hostname = "127.0.0.1",
+    port     = "2222",
+    user     = "tester",
+    password = "password123"
+  )
 
-# Create a single directory and fail if parents are missing
-sftp_mkdir(sftp_conn, "simple_dir", .recursive = FALSE)
+  # Create a nested directory structure
+  sftp_mkdir(sftp_conn, "project/data/results/2026", .recursive = TRUE)
+
+  # Create a single directory and fail if parents are missing
+  sftp_mkdir(sftp_conn, "simple_dir", .recursive = FALSE)
+}
 } # }
 ```

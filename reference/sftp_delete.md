@@ -76,11 +76,21 @@ sftp_delete(
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Delete a single file
-sftp_delete(sftp_conn, "project/old_report.csv")
+# \donttest{
+if (interactive() || Sys.getenv("R_SFTP_TEST_SERVER") == "true") {
+  # Create new SFTP connection
+  sftp_conn <- sftp_connect(
+    hostname = "127.0.0.1",
+    port     = "2222",
+    user     = "tester",
+    password = "password123"
+  )
 
-# Delete an entire directory and its contents
-sftp_delete(sftp_conn, "project/temp_outputs/", .recursive = TRUE)
-} # }
+  # Delete a single file
+  sftp_delete(sftp_conn, "project/old_report.csv")
+
+  # Delete an entire directory and its contents
+  sftp_delete(sftp_conn, "project/temp_outputs/", .recursive = TRUE)
+}
+# }
 ```

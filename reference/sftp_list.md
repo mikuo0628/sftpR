@@ -77,16 +77,18 @@ A `data.frame` containing remote file/directory metadata:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Create a new SFTP connection
-sftp_conn <- sftp_connect(
-  hostname = "127.0.0.1",
-  port     = "2222",
-  user     = "tester",
-  password = "password123"
-)
+# \donttest{
+if (interactive() || Sys.getenv("R_SFTP_TEST_SERVER") == "true") {
+  # Create a new SFTP connection
+  sftp_conn <- sftp_connect(
+    hostname = "127.0.0.1",
+    port     = "2222",
+    user     = "tester",
+    password = "password123"
+  )
 
-# List recursively
-sftp_list(sftp_conn, .recursive = TRUE)
-} # }
+  # List recursively
+  sftp_list(sftp_conn, .recursive = TRUE)
+}
+# }
 ```

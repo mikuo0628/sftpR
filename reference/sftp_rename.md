@@ -67,16 +67,26 @@ identified, and existence ensured before attempting the renaming.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Simple rename in the same folder
-sftp_rename(sftp_conn, "old_name.csv", "new_name.csv")
+# \donttest{
+if (interactive() || Sys.getenv("R_SFTP_TEST_SERVER") == "true") {
+  # Create new SFTP connection
+  sftp_conn <- sftp_connect(
+    hostname = "127.0.0.1",
+    port     = "2222",
+    user     = "tester",
+    password = "password123"
+  )
 
-# Move a file to a new, potentially non-existent directory
-sftp_rename(
-  sftp_conn,
-  "data/raw.csv",
-  "archive/2026/processed.csv",
-  .recursive = TRUE
-)
-} # }
+  # Simple rename in the same folder
+  sftp_rename(sftp_conn, "old_name.csv", "new_name.csv")
+
+  # Move a file to a new, potentially non-existent directory
+  sftp_rename(
+    sftp_conn,
+    "data/raw.csv",
+    "archive/2026/processed.csv",
+    .recursive = TRUE
+  )
+}
+# }
 ```
