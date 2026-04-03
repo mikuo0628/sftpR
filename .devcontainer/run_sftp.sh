@@ -34,3 +34,6 @@ docker run --name sftp_test \
     -p 2222:22 \
     -v "$(pwd)/upload:/home/tester/upload" \
     -d atmoz/sftp tester:password123:::upload
+
+# Create a sys env for test environment
+export R_SFTP_TEST_SERVER=true

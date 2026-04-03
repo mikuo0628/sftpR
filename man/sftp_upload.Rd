@@ -48,7 +48,17 @@ The function uses a secure lifecycle:
 }
 \examples{
 \donttest{
-conn <- sftp_connect(hostname = "sftp.example.com", user = "user")
-sftp_upload(conn, my_df, "uploads/data.csv")
+if (interactive() || Sys.getenv("R_SFTP_TEST_SERVER") == "true") {
+  # Create new SFTP connection
+  sftp_conn <- sftp_connect(
+    hostname = "127.0.0.1",
+    port     = "2222",
+    user     = "tester",
+    password = "password123"
+  )
+
+  # Upload `my_df` as csv
+  sftp_upload(conn, my_df, "uploads/data.csv")
+}
 }
 }
