@@ -35,7 +35,12 @@ for more specific SFTP operations (upload, delete, rename, etc).
 
 ## Installation
 
-You can install the development version of `sftpR` here:
+You can install the stable version of the package from CRAN:
+
+``` r
+install.packages("sftpR")
+```
+And the development version from GitHub:
 
 ``` r
 # install.packages("devtools")
