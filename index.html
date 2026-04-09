@@ -66,15 +66,18 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of <code>sftpR</code> here:</p>
+<p>You can install the stable version of the package from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"sftpR"</span><span class="op">)</span></span></code></pre></div>
+<p>And the development version from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mikuo0628/sftpR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Establish connection (see ?sftp_connect for detail)</span></span>
 <span><span class="va">sftp_conn</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="reference/sftp_connect.html">sftp_connect</a></span><span class="op">(</span></span>
@@ -121,6 +124,7 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=sftpR" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/mikuo0628/sftpR/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/mikuo0628/sftpR/issues" class="external-link">Report a bug</a></li>
 </ul>
